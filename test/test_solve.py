@@ -11,7 +11,7 @@ def test_templates():
     for template_array in generate_templates():
         count_array += template_array
     count_array_expected = 5184 * np.ones((9, 9))
-    assert count_array == count_array_expected
+    assert (count_array == count_array_expected).all()
 
 
 def test_solve_backtrack_valid():
@@ -42,4 +42,4 @@ def test_solve_backtrack_valid():
             [9, 1, 2, 3, 4, 5, 6, 7, 8],
         ]
     )
-    assert solution_grid == solution_grid_expected
+    assert (solution_grid == solution_grid_expected).all()
