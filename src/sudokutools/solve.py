@@ -21,6 +21,7 @@ def generate_templates():
 
 
 def find_valid_templates(grid):
+    # Create indicator arrays for each 3x3 box in the grid
     BOX_GRIDS = np.zeros((9, 9, 9))
     for grid_idx in range(9):
         BOX_GRIDS[
@@ -28,6 +29,7 @@ def find_valid_templates(grid):
             3 * (grid_idx // 3) : 3 * (grid_idx // 3) + 3,
             3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
         ] = 1
+    # Create a nested list of digits 1-9, each list has a unique digit removed
     OTHER_DIGITS = []
     for digit in range(1, 10):
         OTHER_DIGITS.append(list(range(1, digit)) + list(range(digit + 1, 10)))
@@ -35,6 +37,9 @@ def find_valid_templates(grid):
     for template_idx, template in enumerate(generate_templates()):
         for digit in range(1, 10):
             valid = True
+            # Check that none of the template positions are in the same row,
+            # column or box as one of the clues of `digit`, and that they
+            # don't coincide with the position of a different digit.
             digit_grid = (grid == digit) + (template == 1)
             if (
                 (np.sum(digit_grid, axis=0) > 1).any()
