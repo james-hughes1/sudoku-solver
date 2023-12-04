@@ -22,3 +22,7 @@ def generate_templates():
 
 def solve_backtrack(grid):
     return grid
+
+
+def find_valid_templates(grid):
+    return []
