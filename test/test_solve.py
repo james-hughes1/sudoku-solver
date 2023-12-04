@@ -2,8 +2,8 @@ import numpy as np
 
 from src.sudokutools.solve import (
     generate_templates,
-    solve_backtrack,
     find_valid_templates,
+    solve_backtrack,
 )
 
 

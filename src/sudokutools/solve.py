@@ -1,5 +1,5 @@
 import numpy as np
-from itertools import permutations
+from itertools import permutations, product
 
 
 def generate_templates():
@@ -54,4 +54,18 @@ def find_valid_templates(grid):
 
 
 def solve_backtrack(grid):
-    return grid
+    valid_templates_list = find_valid_templates(grid)
+    all_templates = list(generate_templates())
+    found = False
+    while not found:
+        template_idx_tuple = next(product(*valid_templates_list))
+        template_list = [
+            all_templates[template_idx] for template_idx in template_idx_tuple
+        ]
+        if (np.sum(template_list, axis=0) == 1).all():
+            found = True
+    solution_templates = np.stack(template_list)
+    solution_grid = np.sum(
+        np.arange(1, 10).reshape((-1, 1, 1)) * solution_templates, axis=0
+    )
+    return solution_grid
