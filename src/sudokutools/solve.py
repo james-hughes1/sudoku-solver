@@ -57,8 +57,9 @@ def solve_backtrack(grid):
     valid_templates_list = find_valid_templates(grid)
     all_templates = list(generate_templates())
     found = False
+    valid_template_idx_gen = product(*valid_templates_list)
     while not found:
-        template_idx_tuple = next(product(*valid_templates_list))
+        template_idx_tuple = next(valid_template_idx_gen)
         template_list = [
             all_templates[template_idx] for template_idx in template_idx_tuple
         ]

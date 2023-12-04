@@ -21,7 +21,21 @@ start_grid_easy = np.array(
     ]
 )
 
-solution_grid_easy_expected = np.array(
+start_grid_medium = np.array(
+    [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [4, 5, 6, 7, 0, 9, 1, 2, 3],
+        [0, 8, 9, 1, 2, 3, 4, 5, 6],
+        [2, 3, 4, 5, 0, 7, 8, 9, 1],
+        [0, 6, 7, 8, 9, 1, 2, 3, 4],
+        [8, 9, 1, 2, 3, 0, 5, 6, 7],
+        [0, 4, 5, 6, 7, 8, 9, 1, 2],
+        [6, 7, 8, 9, 1, 0, 3, 4, 5],
+        [9, 0, 2, 3, 4, 5, 6, 7, 8],
+    ]
+)
+
+solution_grid_expected = np.array(
     [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
@@ -50,6 +64,11 @@ def test_valid_templates():
         assert len(template_idx_list) == 1
 
 
-def test_solve_backtrack_valid():
+def test_solve_backtrack_easy():
     solution_grid = solve_backtrack(start_grid_easy)
-    assert (solution_grid == solution_grid_easy_expected).all()
+    assert (solution_grid == solution_grid_expected).all()
+
+
+def test_solve_backtrack_medium():
+    solution_grid = solve_backtrack(start_grid_medium)
+    assert (solution_grid == solution_grid_expected).all()
