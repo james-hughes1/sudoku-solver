@@ -1,2 +1,2 @@
-/test/__pycache__
-/src/sudokutools/__pycache__
+__pycache__/
+.pytest_cache
