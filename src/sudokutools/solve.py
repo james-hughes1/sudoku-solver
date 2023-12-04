@@ -20,9 +20,21 @@ def generate_templates():
             yield template_grid
 
 
+def find_valid_templates(grid):
+    valid_templates_list = [[]] * 9
+    for template_idx, template in enumerate(generate_templates()):
+        for digit in range(1, 10):
+            valid = True
+            for i in range(9):
+                for j in range(9):
+                    other_digits = list(range(9))
+                    other_digits.remove(digit)
+                    if grid[i][j] in other_digits and template[i][j] == 1:
+                        valid = False
+            if valid:
+                valid_templates_list[digit - 1].append(template_idx)
+    return valid_templates_list
+
+
 def solve_backtrack(grid):
     return grid
-
-
-def find_valid_templates(grid):
-    return []
