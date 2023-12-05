@@ -49,7 +49,38 @@ solution_grid_expected_1 = np.array(
     ]
 )
 
-start_grid_hard = np.array(
+# Example from
+# https://en.wikipedia.org/wiki/Mathematics_of_Sudoku#Sudokus_with_Few_Clues
+start_grid_minimal = np.array(
+    [
+        [0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 2, 0, 0, 3],
+        [0, 0, 0, 4, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 5, 0, 0],
+        [4, 0, 1, 6, 0, 0, 0, 0, 0],
+        [0, 0, 7, 1, 0, 0, 0, 0, 0],
+        [0, 5, 0, 0, 0, 0, 2, 0, 0],
+        [0, 0, 0, 0, 8, 0, 0, 4, 0],
+        [0, 3, 0, 9, 1, 0, 0, 0, 0],
+    ]
+)
+
+solution_grid_expected_2 = np.array(
+    [
+        [7, 4, 5, 3, 6, 8, 9, 1, 2],
+        [8, 1, 9, 5, 7, 2, 4, 6, 3],
+        [3, 6, 2, 4, 9, 1, 8, 5, 7],
+        [6, 9, 3, 8, 2, 4, 5, 7, 1],
+        [4, 2, 1, 6, 5, 7, 3, 9, 8],
+        [5, 8, 7, 1, 3, 9, 6, 2, 4],
+        [1, 5, 8, 7, 4, 6, 2, 3, 9],
+        [9, 7, 6, 2, 8, 3, 1, 4, 5],
+        [2, 3, 4, 9, 1, 5, 7, 8, 6],
+    ]
+)
+
+# Example from https://en.wikipedia.org/wiki/Sudoku_solving_algorithms
+start_grid_antagonist = np.array(
     [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 3, 0, 8, 5],
@@ -63,7 +94,7 @@ start_grid_hard = np.array(
     ]
 )
 
-solution_grid_expected_2 = np.array(
+solution_grid_expected_3 = np.array(
     [
         [9, 8, 7, 6, 5, 4, 3, 2, 1],
         [2, 4, 6, 1, 7, 3, 9, 8, 5],
@@ -102,6 +133,11 @@ def test_solve_backtrack_medium():
     assert (solution_grid == solution_grid_expected_1).all()
 
 
-def test_solve_backtrack_hard():
-    solution_grid = solve_backtrack(start_grid_hard)
+def test_solve_backtrack_minimal():
+    solution_grid = solve_backtrack(start_grid_minimal)
     assert (solution_grid == solution_grid_expected_2).all()
+
+
+def test_solve_backtrack_antagonist():
+    solution_grid = solve_backtrack(start_grid_antagonist)
+    assert (solution_grid == solution_grid_expected_3).all()
