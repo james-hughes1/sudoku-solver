@@ -84,3 +84,23 @@ def test_write_grid_file_valid():
     grid_actual = read_grid("test/test_files/test_write.txt")
     os.remove("test/test_files/test_write.txt")
     assert (grid_expected == grid_actual).all()
+
+
+def test_write_grid_invalid_type(capfd):
+    write_grid("hi")
+    captured = capfd.readouterr()
+    assert captured.out == "Invalid grid: must be a numpy.array."
+
+
+def test_write_grid_invalid_shape(capfd):
+    invalid_shape_grid = np.vstack([grid_expected, np.arange(9)])
+    write_grid(invalid_shape_grid)
+    captured = capfd.readouterr()
+    assert captured.out == "Invalid grid: shape must be (9, 9)."
+
+
+def test_write_grid_invalid_entries(capfd):
+    invalid_entry_grid = 42 * np.ones((9, 9))
+    write_grid(invalid_entry_grid)
+    captured = capfd.readouterr()
+    assert captured.out == "Invalid grid: entries must be integers [0-9]."
