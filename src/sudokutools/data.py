@@ -39,19 +39,26 @@ def read_grid(filepath):
 
 
 def write_grid(grid, filepath=None):
-    grid_str = ""
-    for row_idx in range(9):
-        row_str = ""
-        for col_idx in range(9):
-            row_str += str(grid[row_idx][col_idx])
-            if col_idx in [2, 5]:
-                row_str += "|"
-        row_str += "\n"
-        grid_str += row_str
-        if row_idx in [2, 5]:
-            grid_str += "---+---+---\n"
-    if filepath is None:
-        print(grid_str)
+    if not isinstance(grid, np.ndarray):
+        print("Invalid grid: must be a numpy.array.")
+    elif grid.shape != (9, 9):
+        print("Invalid grid: shape must be (9, 9).")
+    elif not (np.isin(grid, np.arange(10))).all():
+        print("Invalid grid: entries must be integers [0-9].")
     else:
-        with open(filepath, "w") as file:
-            file.write(grid_str)
+        grid_str = ""
+        for row_idx in range(9):
+            row_str = ""
+            for col_idx in range(9):
+                row_str += str(grid[row_idx][col_idx])
+                if col_idx in [2, 5]:
+                    row_str += "|"
+            row_str += "\n"
+            grid_str += row_str
+            if row_idx in [2, 5]:
+                grid_str += "---+---+---\n"
+        if filepath is None:
+            print(grid_str)
+        else:
+            with open(filepath, "w") as file:
+                file.write(grid_str)
