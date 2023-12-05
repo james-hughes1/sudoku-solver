@@ -35,7 +35,35 @@ start_grid_medium = np.array(
     ]
 )
 
-solution_grid_expected = np.array(
+solution_grid_expected_1 = np.array(
+    [
+        [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [4, 5, 6, 7, 8, 9, 1, 2, 3],
+        [7, 8, 9, 1, 2, 3, 4, 5, 6],
+        [2, 3, 4, 5, 6, 7, 8, 9, 1],
+        [5, 6, 7, 8, 9, 1, 2, 3, 4],
+        [8, 9, 1, 2, 3, 4, 5, 6, 7],
+        [3, 4, 5, 6, 7, 8, 9, 1, 2],
+        [6, 7, 8, 9, 1, 2, 3, 4, 5],
+        [9, 1, 2, 3, 4, 5, 6, 7, 8],
+    ]
+)
+
+start_grid_hard = np.array(
+    [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 3, 0, 8, 5],
+        [0, 0, 1, 0, 2, 0, 0, 0, 0],
+        [0, 0, 0, 5, 0, 7, 0, 0, 0],
+        [0, 0, 4, 0, 0, 0, 1, 0, 0],
+        [0, 9, 0, 0, 0, 0, 0, 0, 0],
+        [5, 0, 0, 0, 0, 0, 0, 7, 3],
+        [0, 0, 2, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 9],
+    ]
+)
+
+solution_grid_expected_2 = np.array(
     [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
@@ -66,9 +94,14 @@ def test_valid_templates():
 
 def test_solve_backtrack_easy():
     solution_grid = solve_backtrack(start_grid_easy)
-    assert (solution_grid == solution_grid_expected).all()
+    assert (solution_grid == solution_grid_expected_1).all()
 
 
 def test_solve_backtrack_medium():
     solution_grid = solve_backtrack(start_grid_medium)
-    assert (solution_grid == solution_grid_expected).all()
+    assert (solution_grid == solution_grid_expected_1).all()
+
+
+def test_solve_backtrack_hard():
+    solution_grid = solve_backtrack(start_grid_hard)
+    assert (solution_grid == solution_grid_expected_2).all()
