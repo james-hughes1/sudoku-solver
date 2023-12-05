@@ -53,6 +53,30 @@ def find_valid_templates(grid):
     return valid_templates_list
 
 
+def refine_valid_templates(grid, valid_templates_list):
+    all_templates = list(generate_templates())
+    refined = False
+    while not refined:
+        refined = True
+        for digit_idx in range(9):
+            num_valid_templates_digit = len(valid_templates_list[digit_idx])
+            template_list_digit = [
+                all_templates[template_idx]
+                for template_idx in valid_templates_list[digit_idx]
+            ]
+            fixed_digits = (
+                np.sum(template_list_digit, axis=0)
+                == num_valid_templates_digit
+            )
+            if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
+                refined = False
+                grid += (digit_idx + 1) * (
+                    1 * fixed_digits - 1 * (grid == (digit_idx + 1))
+                )
+                valid_templates_list = find_valid_templates(grid)
+    return grid, valid_templates_list
+
+
 def solve_backtrack(grid):
     valid_templates_list = find_valid_templates(grid)
     all_templates = list(generate_templates())
