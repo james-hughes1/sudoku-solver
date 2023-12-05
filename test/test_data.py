@@ -20,7 +20,7 @@ grid_expected = np.array(
 str_expected = (
     "000|007|000\n000|009|504\n000|050|169\n---+---+---\n"
     "080|000|305\n075|000|290\n406|000|080\n---+---+---\n"
-    "762|080|000\n103|900|000\n000|600|000"
+    "762|080|000\n103|900|000\n000|600|000\n"
 )
 
 
@@ -76,7 +76,7 @@ def test_read_grid_non_existing(capfd):
 def test_write_grid_terminal_valid(capfd):
     write_grid(grid_expected)
     captured = capfd.readouterr()
-    assert captured == str_expected
+    assert captured.out == str_expected + "\n"
 
 
 def test_write_grid_file_valid():
