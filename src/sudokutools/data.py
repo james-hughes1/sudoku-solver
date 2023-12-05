@@ -13,5 +13,20 @@ def read_grid(filepath):
     return grid
 
 
-def write_grid(grid, filename=None):
-    return 0
+def write_grid(grid, filepath=None):
+    grid_str = ""
+    for row_idx in range(9):
+        row_str = ""
+        for col_idx in range(9):
+            row_str += str(grid[row_idx][col_idx])
+            if col_idx in [2, 5]:
+                row_str += "|"
+        row_str += "\n"
+        grid_str += row_str
+        if row_idx in [2, 5]:
+            grid_str += "---+---+---\n"
+    if filepath is None:
+        print(grid_str)
+    else:
+        with open(filepath, "w") as file:
+            file.write(grid_str)
