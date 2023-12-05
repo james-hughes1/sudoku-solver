@@ -1,5 +1,6 @@
 import numpy as np
-from itertools import permutations, product
+from itertools import permutations
+from copy import deepcopy
 
 
 def generate_templates():
@@ -84,19 +85,87 @@ def refine_valid_templates(grid, valid_templates_list):
 
 
 def solve_backtrack(grid):
+    # Find set of valid templates and refine the set
     valid_templates_list = find_valid_templates(grid)
-    all_templates = list(generate_templates())
-    found = False
-    valid_template_idx_gen = product(*valid_templates_list)
-    while not found:
-        template_idx_tuple = next(valid_template_idx_gen)
-        template_list = [
-            all_templates[template_idx] for template_idx in template_idx_tuple
-        ]
-        if (np.sum(template_list, axis=0) == 1).all():
-            found = True
-    solution_templates = np.stack(template_list)
-    solution_grid = np.sum(
-        np.arange(1, 10).reshape((-1, 1, 1)) * solution_templates, axis=0
+    grid, valid_templates_list = refine_valid_templates(
+        grid, valid_templates_list
     )
-    return solution_grid
+    all_templates = list(generate_templates())
+    solved = False
+    # Create nested list for candidate digits for each cell, from valid
+    # templates
+    possible_digits_array = np.zeros((9, 9, 9))
+    possible_digits_list = [
+        deepcopy([[].copy() for _ in range(9)]) for _ in range(9)
+    ]
+    for digit_idx in range(9):
+        for template_idx in valid_templates_list[digit_idx]:
+            possible_digits_array[digit_idx] += all_templates[template_idx]
+        for row_idx in range(9):
+            for col_idx in range(9):
+                if possible_digits_array[digit_idx][row_idx][col_idx] > 0:
+                    possible_digits_list[row_idx][col_idx].append(
+                        digit_idx + 1
+                    )
+    possible_digits_gens = [
+        [
+            (x for x in possible_digits_list[row_idx][col_idx] + [0])
+            for col_idx in range(9)
+        ]
+        for row_idx in range(9)
+    ]
+    search_positions = np.vstack(np.where(grid == 0))
+    num_search_positions = search_positions.shape[1]
+    # Don't search if the refinement of templates solves the sudoku, which
+    # happens often
+    if num_search_positions == 0:
+        solved = True
+    search_idx = 0
+    while not solved:
+        print(grid)
+        current_position = (
+            search_positions[0, search_idx],
+            search_positions[1, search_idx],
+        )
+        new_value = next(
+            possible_digits_gens[current_position[0]][current_position[1]]
+        )
+        grid[current_position] = new_value
+        # When you reach the maximum candidate digit, backtrack
+        if new_value == 0:
+            possible_digits_gens[current_position[0]][current_position[1]] = (
+                x
+                for x in possible_digits_list[current_position[0]][
+                    current_position[1]
+                ]
+                + [0]
+            )
+            search_idx -= 1
+            assert search_idx >= 0
+        else:
+            # Check if partially correct
+            partial_solve = True
+            for element_idx in range(9):
+                _, counts = np.unique(grid[element_idx, :], return_counts=True)
+                if (counts[1:] > 1).any():
+                    partial_solve = False
+                _, counts = np.unique(grid[:, element_idx], return_counts=True)
+                if (counts[1:] > 1).any():
+                    partial_solve = False
+                _, counts = np.unique(
+                    grid[
+                        3 * (element_idx // 3) : 3 * (element_idx // 3) + 3,
+                        3 * (element_idx % 3) : 3 * (element_idx % 3) + 3,
+                    ],
+                    return_counts=True,
+                )
+                if (counts[1:] > 1).any():
+                    partial_solve = False
+            # If current solution is valid, advance the search to the next
+            # cell
+            if partial_solve:
+                if search_idx == num_search_positions - 1:
+                    solved = True
+                else:
+                    search_idx += 1
+    return grid
