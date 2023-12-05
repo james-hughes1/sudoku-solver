@@ -55,6 +55,7 @@ def find_valid_templates(grid):
 
 def refine_valid_templates(grid, valid_templates_list):
     all_templates = list(generate_templates())
+    # Loop until the set of valid templates no longer gets smaller
     refined = False
     while not refined:
         refined = True
@@ -64,10 +65,15 @@ def refine_valid_templates(grid, valid_templates_list):
                 all_templates[template_idx]
                 for template_idx in valid_templates_list[digit_idx]
             ]
+            # Grid of booleans indicating digits that are fixed across all
+            # templates
             fixed_digits = (
                 np.sum(template_list_digit, axis=0)
                 == num_valid_templates_digit
             )
+            # If there is a fixed digit that is not already on the board, add
+            # it to the board and refine the set of valid templates for all
+            # digits
             if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
                 refined = False
                 grid += (digit_idx + 1) * (
