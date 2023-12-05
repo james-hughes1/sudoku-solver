@@ -33,7 +33,7 @@ def test_read_grid_valid():
 
 
 def test_read_grid_accepted():
-    grid_actual = read_grid("test/test_files/test_grid_accepted.txt")
+    grid_actual = read_grid("test/test_files/test_grid_acceptable.txt")
     assert (grid_actual.shape[0] == grid_expected.shape[0]) and (
         grid_actual.shape[1] == grid_expected.shape[1]
     )
