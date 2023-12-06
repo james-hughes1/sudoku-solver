@@ -138,7 +138,13 @@ def solve_backtrack(grid):
                         )
         possible_digits_gens = [
             [
-                (x for x in possible_digits_list[row_idx][col_idx] + [0])
+                (
+                    possible_digits
+                    for possible_digits in possible_digits_list[row_idx][
+                        col_idx
+                    ]
+                    + [0]
+                )
                 for col_idx in range(9)
             ]
             for row_idx in range(9)
@@ -151,7 +157,6 @@ def solve_backtrack(grid):
             solved = True
         search_idx = 0
         while not solved:
-            print(grid)
             current_position = (
                 search_positions[0, search_idx],
                 search_positions[1, search_idx],
@@ -165,10 +170,10 @@ def solve_backtrack(grid):
                 possible_digits_gens[current_position[0]][
                     current_position[1]
                 ] = (
-                    x
-                    for x in possible_digits_list[current_position[0]][
-                        current_position[1]
-                    ]
+                    possible_digits
+                    for possible_digits in possible_digits_list[
+                        current_position[0]
+                    ][current_position[1]]
                     + [0]
                 )
                 search_idx -= 1
