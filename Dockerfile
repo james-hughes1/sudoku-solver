@@ -1,9 +1,9 @@
 FROM continuumio/miniconda3
 
-RUN mkdir -p signal-analysis
+RUN mkdir -p jh2284
 
-COPY . /signal-analysis
+COPY . /jh2284
 
-WORKDIR /signal-analysis
+WORKDIR /jh2284
 
 RUN conda env update --file environment.yml --name base
