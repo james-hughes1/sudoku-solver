@@ -1,2 +1,7 @@
+# Cache and Testing
 __pycache__/
 .pytest_cache
+
+# Folders
+docs/
+!*Doxyfile

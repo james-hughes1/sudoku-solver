@@ -10,7 +10,16 @@ from itertools import permutations
 from copy import deepcopy
 
 
-def generate_templates() -> Generator[int, None, None]:
+def generate_templates() -> Generator[np.ndarray, None, None]:
+    """!@brief Generator for sudoku solution templates.
+
+    @details This generator yields a 9x9 sudoku grid with just 9 non-zero
+    entries, ones,  which represent a possible distribution of any fixed
+    digit from 1 to 9 in the solution grid. Iterating through the generator
+    produces all 46656 possible templates.
+
+    @return template_grid Digit template generator.
+    """
     # Generate nested list of permutations of [0,1,2]
     PERMUTATIONS_012 = [list(perm) for perm in permutations(range(3))]
     for column_by_row in permutations(range(9)):
@@ -29,6 +38,16 @@ def generate_templates() -> Generator[int, None, None]:
 
 
 def find_valid_templates(grid: np.ndarray) -> list[list[int]]:
+    """!@brief Produce a list of templates applicable to a sudoku grid.
+
+    @details Given a starting grid of clues, this function iterates through
+    all possible templates, and - for each digit - stores the subset of
+    templates that are valid given the clues.
+
+    @param grid Sudoku grid stored as a np.ndarray.
+
+    @return valid_templates_list The subsets of valid templates for each digit.
+    """
     # Create indicator arrays for each 3x3 box in the grid
     BOX_GRIDS = np.zeros((9, 9, 9))
     for grid_idx in range(9):
@@ -64,6 +83,23 @@ def find_valid_templates(grid: np.ndarray) -> list[list[int]]:
 def refine_valid_templates(
     grid: np.ndarray, valid_templates_list: list[list[int]]
 ) -> list[list[int]]:
+    """!@brief Filters the list of valid templates given the grid of clues.
+
+    @details Loops through the subset of valid templates for each digit,
+    checking if there is a cell on the grid occupied in all templates, but
+    not recorded on the grid of clues. If such a location is found, this
+    cell is filled in with the digit, and the valid_templates_list
+    regenerated; it will be smaller since the grid has fewer empty cells.
+    Continues to loop until the valid_templates_list no longer changes.
+
+    @param grid Sudoku grid stored as a np.ndarray.
+    @param valid_templates_list List of subsets of valid templates for
+    each digit; a list of this format can be produced using @ref
+    find_valid_templates.
+
+    @return valid_templates_list List of subsets of valid templates for
+    each digit.
+    """
     all_templates = list(generate_templates())
     # Loop until the set of valid templates no longer gets smaller
     refined = False
@@ -94,6 +130,16 @@ def refine_valid_templates(
 
 
 def check_grid_valid(grid: np.ndarray) -> bool:
+    """!@brief Checks if grid represents part of a valid solution to a sudoku
+    puzzle.
+
+    @details Returns a boolean value indicating whether or not the grid has
+    repeated digits in each row, column and 3x3 box.
+
+    @param grid Sudoku grid stored as a np.ndarray.
+
+    @return valid True if grid is valid, False otherwise.
+    """
     valid = True
     for element_idx in range(9):
         _, counts = np.unique(grid[element_idx, :], return_counts=True)
@@ -115,6 +161,14 @@ def check_grid_valid(grid: np.ndarray) -> bool:
 
 
 def solve_backtrack(grid: np.ndarray) -> np.ndarray:
+    """!@brief Solves a sudoku using the backtracking method, using templates
+    to filter the possible values first.
+
+    @param grid Sudoku grid of clues stored as a np.ndarray.
+
+    @return grid Sudoku grid with all cells containing digits 1-9, so that
+    all sudoku rules are satisfied.
+    """
     # Check if the start grid clues are valid
     if not check_grid_valid(grid):
         print(
