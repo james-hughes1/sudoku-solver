@@ -1,7 +1,22 @@
+"""!@file data.py
+    @brief Module containing tools to read .txt files as sudoku grids stored
+    as np.ndarray, and conversely output stored sudoku grids as .txt files.
+    @author Created by J. Hughes on 06/12/2023.
+"""
+
+
 import numpy as np
 
 
 def read_grid(filepath: str) -> np.ndarray:
+    """!@brief Read in a sudoku grid from a .txt file.
+    @details Converts the given .txt file contents to a np.ndarray which
+    represents the 9x9 sudoku grid. Expects a file in which exactly 9 of
+    the lines contain exactly 9 digit characters each, with no digits on
+    other lines.
+    @param filepath Specified filepath. Must end with .txt.
+    @returns grid Sudoku grid stored as a np.ndarray.
+    """
     if filepath[-4:] != ".txt":
         print(
             "Invalid filepath: should end in .txt extension;"
@@ -39,6 +54,14 @@ def read_grid(filepath: str) -> np.ndarray:
 
 
 def write_grid(grid: np.ndarray, filepath: str = None):
+    """!@brief Write a sudoku grid out to the terminal or to a specified text
+    file.
+    @details Converts the np.ndarray to a representative string with added
+    symbols for readability. If no filepath specified the string is
+    outputted to the terminal, otherwise it is stored in the specified
+    .txt file location.
+    @param grid Sudoku grid stored as a np.ndarray.
+    """
     if not isinstance(grid, np.ndarray):
         print("Invalid grid: must be a numpy.array.")
     elif grid.shape != (9, 9):

@@ -1,7 +1,6 @@
 """!@file solve.py
-@brief Module containing tools to solve sudoku grids.
-
-@author Created by J. hughes on 06/12/2023.
+    @brief Module containing tools to solve sudoku grids.
+    @author Created by J. Hughes on 06/12/2023.
 """
 
 from typing import Generator
