@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def read_grid(filepath):
+def read_grid(filepath: str) -> np.ndarray:
     if filepath[-4:] != ".txt":
         print(
             "Invalid filepath: should end in .txt extension;"
@@ -38,7 +38,7 @@ def read_grid(filepath):
                 return grid
 
 
-def write_grid(grid, filepath=None):
+def write_grid(grid: np.ndarray, filepath: str = None):
     if not isinstance(grid, np.ndarray):
         print("Invalid grid: must be a numpy.array.")
     elif grid.shape != (9, 9):

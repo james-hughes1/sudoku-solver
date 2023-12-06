@@ -1,9 +1,16 @@
+"""!@file solve.py
+@brief Module containing tools to solve sudoku grids.
+
+@author Created by J. hughes on 06/12/2023.
+"""
+
+from typing import Generator
 import numpy as np
 from itertools import permutations
 from copy import deepcopy
 
 
-def generate_templates():
+def generate_templates() -> Generator[int, None, None]:
     # Generate nested list of permutations of [0,1,2]
     PERMUTATIONS_012 = [list(perm) for perm in permutations(range(3))]
     for column_by_row in permutations(range(9)):
@@ -21,7 +28,7 @@ def generate_templates():
             yield template_grid
 
 
-def find_valid_templates(grid):
+def find_valid_templates(grid: np.ndarray) -> list[list[int]]:
     # Create indicator arrays for each 3x3 box in the grid
     BOX_GRIDS = np.zeros((9, 9, 9))
     for grid_idx in range(9):
@@ -54,7 +61,9 @@ def find_valid_templates(grid):
     return valid_templates_list
 
 
-def refine_valid_templates(grid, valid_templates_list):
+def refine_valid_templates(
+    grid: np.ndarray, valid_templates_list: list[list[int]]
+) -> list[list[int]]:
     all_templates = list(generate_templates())
     # Loop until the set of valid templates no longer gets smaller
     refined = False
@@ -84,7 +93,7 @@ def refine_valid_templates(grid, valid_templates_list):
     return grid, valid_templates_list
 
 
-def check_grid_valid(grid):
+def check_grid_valid(grid: np.ndarray) -> bool:
     valid = True
     for element_idx in range(9):
         _, counts = np.unique(grid[element_idx, :], return_counts=True)
@@ -105,7 +114,7 @@ def check_grid_valid(grid):
     return valid
 
 
-def solve_backtrack(grid):
+def solve_backtrack(grid: np.ndarray) -> np.ndarray:
     # Check if the start grid clues are valid
     if not check_grid_valid(grid):
         print(
