@@ -5,3 +5,4 @@ __pycache__/
 # Folders
 docs/
 !*Doxyfile
+prof/scripts/
