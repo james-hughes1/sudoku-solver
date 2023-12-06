@@ -3,6 +3,7 @@ import numpy as np
 from src.sudokutools.solve import (
     generate_templates,
     find_valid_templates,
+    check_grid_valid,
     solve_backtrack,
 )
 
@@ -21,6 +22,8 @@ start_grid_easy = np.array(
     ]
 )
 
+start_grid_invalid = start_grid_easy.copy()
+start_grid_invalid[0, 0] = 2
 
 solution_grid_expected_1 = np.array(
     [
@@ -57,13 +60,11 @@ def test_solve_backtrack_easy():
 
 
 def test_solve_backtrack_invalid(capfd):
-    start_grid_invalid = start_grid_easy.copy()
-    start_grid_invalid[0, 0] = 2
     solve_backtrack(start_grid_invalid)
     captured = capfd.readouterr()
     assert (
         captured.out == "Invalid starting grid, each digit can only appear "
-        "once in each row, column and 3x3 box."
+        "once in each row, column and 3x3 box.\n"
     )
 
 
@@ -71,28 +72,4 @@ def test_solve_backtrack_few_clues(capfd):
     start_grid = np.zeros((9, 9))
     start_grid[0, 0] = 1
     solution_grid = solve_backtrack(start_grid)
-    # Check that the solution is valid
-    solve = True
-    for element_idx in range(9):
-        _, counts = np.unique(
-            solution_grid[element_idx, :], return_counts=True
-        )
-        if (counts[1:] > 1).any():
-            solve = False
-        _, counts = np.unique(
-            solution_grid[:, element_idx], return_counts=True
-        )
-        if (counts[1:] > 1).any():
-            solve = False
-        _, counts = np.unique(
-            solution_grid[
-                3 * (element_idx // 3) : 3 * (element_idx // 3) + 3,
-                3 * (element_idx % 3) : 3 * (element_idx % 3) + 3,
-            ],
-            return_counts=True,
-        )
-        if (counts[1:] > 1).any():
-            solve = False
-    if (solution_grid == 0).any():
-        solve = False
-    assert solve
+    assert (solution_grid != 0).all() and check_grid_valid(solution_grid)

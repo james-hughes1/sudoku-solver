@@ -84,88 +84,101 @@ def refine_valid_templates(grid, valid_templates_list):
     return grid, valid_templates_list
 
 
+def check_grid_valid(grid):
+    valid = True
+    for element_idx in range(9):
+        _, counts = np.unique(grid[element_idx, :], return_counts=True)
+        if (counts[1:] > 1).any():
+            valid = False
+        _, counts = np.unique(grid[:, element_idx], return_counts=True)
+        if (counts[1:] > 1).any():
+            valid = False
+        _, counts = np.unique(
+            grid[
+                3 * (element_idx // 3) : 3 * (element_idx // 3) + 3,
+                3 * (element_idx % 3) : 3 * (element_idx % 3) + 3,
+            ],
+            return_counts=True,
+        )
+        if (counts[1:] > 1).any():
+            valid = False
+    return valid
+
+
 def solve_backtrack(grid):
-    # Find set of valid templates and refine the set
-    valid_templates_list = find_valid_templates(grid)
-    grid, valid_templates_list = refine_valid_templates(
-        grid, valid_templates_list
-    )
-    all_templates = list(generate_templates())
-    solved = False
-    # Create nested list for candidate digits for each cell, from valid
-    # templates
-    possible_digits_array = np.zeros((9, 9, 9))
-    possible_digits_list = [
-        deepcopy([[].copy() for _ in range(9)]) for _ in range(9)
-    ]
-    for digit_idx in range(9):
-        for template_idx in valid_templates_list[digit_idx]:
-            possible_digits_array[digit_idx] += all_templates[template_idx]
-        for row_idx in range(9):
-            for col_idx in range(9):
-                if possible_digits_array[digit_idx][row_idx][col_idx] > 0:
-                    possible_digits_list[row_idx][col_idx].append(
-                        digit_idx + 1
-                    )
-    possible_digits_gens = [
-        [
-            (x for x in possible_digits_list[row_idx][col_idx] + [0])
-            for col_idx in range(9)
+    # Check if the start grid clues are valid
+    if not check_grid_valid(grid):
+        print(
+            "Invalid starting grid, each digit can only appear "
+            "once in each row, column and 3x3 box."
+        )
+        return np.zeros((9, 9))
+    else:
+        # Find set of valid templates and refine the set
+        valid_templates_list = find_valid_templates(grid)
+        grid, valid_templates_list = refine_valid_templates(
+            grid, valid_templates_list
+        )
+        all_templates = list(generate_templates())
+        solved = False
+        # Create nested list for candidate digits for each cell, from valid
+        # templates
+        possible_digits_array = np.zeros((9, 9, 9))
+        possible_digits_list = [
+            deepcopy([[].copy() for _ in range(9)]) for _ in range(9)
         ]
-        for row_idx in range(9)
-    ]
-    search_positions = np.vstack(np.where(grid == 0))
-    num_search_positions = search_positions.shape[1]
-    # Don't search if the refinement of templates solves the sudoku, which
-    # happens often
-    if num_search_positions == 0:
-        solved = True
-    search_idx = 0
-    while not solved:
-        print(grid)
-        current_position = (
-            search_positions[0, search_idx],
-            search_positions[1, search_idx],
-        )
-        new_value = next(
-            possible_digits_gens[current_position[0]][current_position[1]]
-        )
-        grid[current_position] = new_value
-        # When you reach the maximum candidate digit, backtrack
-        if new_value == 0:
-            possible_digits_gens[current_position[0]][current_position[1]] = (
-                x
-                for x in possible_digits_list[current_position[0]][
-                    current_position[1]
-                ]
-                + [0]
+        for digit_idx in range(9):
+            for template_idx in valid_templates_list[digit_idx]:
+                possible_digits_array[digit_idx] += all_templates[template_idx]
+            for row_idx in range(9):
+                for col_idx in range(9):
+                    if possible_digits_array[digit_idx][row_idx][col_idx] > 0:
+                        possible_digits_list[row_idx][col_idx].append(
+                            digit_idx + 1
+                        )
+        possible_digits_gens = [
+            [
+                (x for x in possible_digits_list[row_idx][col_idx] + [0])
+                for col_idx in range(9)
+            ]
+            for row_idx in range(9)
+        ]
+        search_positions = np.vstack(np.where(grid == 0))
+        num_search_positions = search_positions.shape[1]
+        # Don't search if the refinement of templates solves the sudoku, which
+        # happens often
+        if num_search_positions == 0:
+            solved = True
+        search_idx = 0
+        while not solved:
+            print(grid)
+            current_position = (
+                search_positions[0, search_idx],
+                search_positions[1, search_idx],
             )
-            search_idx -= 1
-            assert search_idx >= 0
-        else:
-            # Check if partially correct
-            partial_solve = True
-            for element_idx in range(9):
-                _, counts = np.unique(grid[element_idx, :], return_counts=True)
-                if (counts[1:] > 1).any():
-                    partial_solve = False
-                _, counts = np.unique(grid[:, element_idx], return_counts=True)
-                if (counts[1:] > 1).any():
-                    partial_solve = False
-                _, counts = np.unique(
-                    grid[
-                        3 * (element_idx // 3) : 3 * (element_idx // 3) + 3,
-                        3 * (element_idx % 3) : 3 * (element_idx % 3) + 3,
-                    ],
-                    return_counts=True,
+            new_value = next(
+                possible_digits_gens[current_position[0]][current_position[1]]
+            )
+            grid[current_position] = new_value
+            # When you reach the maximum candidate digit, backtrack
+            if new_value == 0:
+                possible_digits_gens[current_position[0]][
+                    current_position[1]
+                ] = (
+                    x
+                    for x in possible_digits_list[current_position[0]][
+                        current_position[1]
+                    ]
+                    + [0]
                 )
-                if (counts[1:] > 1).any():
-                    partial_solve = False
-            # If current solution is valid, advance the search to the next
-            # cell
-            if partial_solve:
-                if search_idx == num_search_positions - 1:
-                    solved = True
-                else:
-                    search_idx += 1
-    return grid
+                search_idx -= 1
+                assert search_idx >= 0
+            else:
+                # If current solution is valid, advance the search to the next
+                # cell
+                if check_grid_valid(grid):
+                    if search_idx == num_search_positions - 1:
+                        solved = True
+                    else:
+                        search_idx += 1
+        return grid
