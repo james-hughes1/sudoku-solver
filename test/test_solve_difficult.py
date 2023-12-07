@@ -1,6 +1,7 @@
 import numpy as np
 from src.sudokutools.solve import solve_backtrack
 
+# Medium sudoku challenge, with solution
 start_grid_medium = np.array(
     [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],

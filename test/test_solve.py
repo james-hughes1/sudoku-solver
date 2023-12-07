@@ -7,7 +7,7 @@ from src.sudokutools.solve import (
     solve_backtrack,
 )
 
-
+# Initialise some basic sudoku grids, and a solution grid.
 start_grid_easy = np.array(
     [
         [1, 2, 3, 4, 5, 6, 7, 8, 0],
@@ -25,7 +25,7 @@ start_grid_easy = np.array(
 start_grid_invalid = start_grid_easy.copy()
 start_grid_invalid[0, 0] = 2
 
-solution_grid_expected_1 = np.array(
+solution_grid_expected = np.array(
     [
         [1, 2, 3, 4, 5, 6, 7, 8, 9],
         [4, 5, 6, 7, 8, 9, 1, 2, 3],
@@ -41,6 +41,9 @@ solution_grid_expected_1 = np.array(
 
 
 def test_templates():
+    # This test uses the fact that there are 46656 templates, and any given
+    # cell on the grid is filled in 1 out of 9 of these templates, i.e.
+    # 5184.
     count_array = np.zeros((9, 9))
     for template_array in generate_templates():
         count_array += template_array
@@ -55,7 +58,7 @@ def test_valid_templates():
 
 def test_solve_backtrack_easy():
     solution_grid = solve_backtrack(start_grid_easy)
-    assert (solution_grid == solution_grid_expected_1).all()
+    assert (solution_grid == solution_grid_expected).all()
 
 
 def test_solve_backtrack_invalid(capfd):

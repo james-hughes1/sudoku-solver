@@ -3,6 +3,7 @@ import os
 
 from src.sudokutools.data import read_grid, write_grid
 
+# Initalise an array and string representing the same grid.
 grid_expected = np.array(
     [
         [0, 0, 0, 0, 0, 7, 0, 0, 0],
