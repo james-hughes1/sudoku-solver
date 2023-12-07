@@ -49,9 +49,8 @@ def test_templates():
 
 
 def test_valid_templates():
-    valid_templates_list = find_valid_templates(start_grid_easy)
-    for template_idx_list in valid_templates_list:
-        assert len(template_idx_list) == 1
+    valid_templates_array = find_valid_templates(start_grid_easy)
+    assert (np.sum(valid_templates_array, axis=1) == np.ones(9)).all()
 
 
 def test_solve_backtrack_easy():
