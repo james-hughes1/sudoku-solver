@@ -1,46 +1,35 @@
 Timer unit: 1e-09 s
 
-Total time: 8.50933 s
+Total time: 0.211242 s
 File: /home/jhughes2712/projects/c1_assessment/jh2284/prof/scripts/find_valid_templates_hard.py
-Function: find_valid_templates at line 33
+Function: find_valid_templates at line 72
 
 Line #      Hits         Time  Per Hit   % Time  Line Contents
 ==============================================================
-    33                                           def find_valid_templates(grid: np.ndarray) -> list[list[int]]:
-    34                                               """!@brief Produce a list of templates applicable to a sudoku grid.
-    35                                               @details Given a starting grid of clues, this function iterates through
-    36                                               all possible templates, and - for each digit - stores the subset of
-    37                                               templates that are valid given the clues.
-    38                                               @param grid Sudoku grid stored as a np.ndarray.
-    39                                               @return valid_templates_list The subsets of valid templates for each digit.
-    40                                               """
-    41                                               # Create indicator arrays for each 3x3 box in the grid
-    42         1       5625.0   5625.0      0.0      BOX_GRIDS = np.zeros((9, 9, 9))
-    43        10       2502.0    250.2      0.0      for grid_idx in range(9):
-    44        18      10427.0    579.3      0.0          BOX_GRIDS[
-    45        18       2468.0    137.1      0.0              grid_idx,
-    46         9       2726.0    302.9      0.0              3 * (grid_idx // 3) : 3 * (grid_idx // 3) + 3,
-    47         9       2801.0    311.2      0.0              3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
-    48         9        846.0     94.0      0.0          ] = 1
-    49                                               # Create a nested list of digits 1-9, each list has a unique digit removed
-    50         1        193.0    193.0      0.0      OTHER_DIGITS = []
-    51        10       1890.0    189.0      0.0      for digit in range(1, 10):
-    52         9      10906.0   1211.8      0.0          OTHER_DIGITS.append(list(range(1, digit)) + list(range(digit + 1, 10)))
-    53         1        394.0    394.0      0.0      valid_templates_list = [[], [], [], [], [], [], [], [], []]
-    54     46657  881780847.0  18899.2     10.4      for template_idx, template in enumerate(generate_templates()):
-    55    466560  103084223.0    220.9      1.2          for digit in range(1, 10):
-    56    419904   53382961.0    127.1      0.6              valid = True
-    57                                                       # Check that none of the template positions are in the same row,
-    58                                                       # column or box as one of the clues of `digit`, and that they
-    59                                                       # don't coincide with the position of a different digit.
-    60    419904 1451481040.0   3456.7     17.1              digit_grid = (grid == digit) + (template == 1)
-    61    487536  123188586.0    252.7      1.4              if (
-    62    419904 3682335875.0   8769.5     43.3                  (np.sum(digit_grid, axis=0) > 1).any()
-    63     22544  184007043.0   8162.1      2.2                  or (np.sum(digit_grid, axis=1) > 1).any()
-    64     22544  303839851.0  13477.6      3.6                  or (np.sum(BOX_GRIDS * digit_grid, axis=(1, 2)) > 1).any()
-    65     22544 1572823784.0  69766.8     18.5                  or (np.isin(grid, OTHER_DIGITS[digit - 1]) * template).any()
-    66                                                       ):
-    67    415776   78448193.0    188.7      0.9                  valid = False
-    68    419904   71661959.0    170.7      0.8              if valid:
-    69      4128    3256414.0    788.9      0.0                  valid_templates_list[digit - 1].append(template_idx)
-    70         1        806.0    806.0      0.0      return valid_templates_list
+    72                                           def find_valid_templates(
+    73                                               grid: np.ndarray, valid_templates_array: np.ndarray = None
+    74                                           ) -> np.ndarray:
+    75                                               """!@brief Produce a list of templates applicable to a sudoku grid.
+    76                                               @details Given a starting grid of clues, this function iterates through
+    77                                               all possible templates, and - for each digit - stores the subset of
+    78                                               templates that are valid given the clues.
+    79                                               @param grid Sudoku grid stored as a np.ndarray.
+    80                                               @param valid_templates_array Optional, allows search through a subset of
+    81                                               all possible templates.
+    82                                               @return valid_templates_array The subsets of valid templates for each
+    83                                               digit.
+    84                                               """
+    85         1        854.0    854.0      0.0      if valid_templates_array is None:
+    86         1     434372.0 434372.0      0.2          valid_templates_array = np.ones((9, 46656))
+    87        10      14626.0   1462.6      0.0      for digit in range(1, 10):
+    88         9     219661.0  24406.8      0.1          digit_grid = 1 * (grid == digit)
+    89         9  106508753.0    1e+07     50.4          digit_valid_grid = np.any(ALL_TEMPLATES - digit_grid < 0, axis=(1, 2))
+    90         9     219162.0  24351.3      0.1          other_digit_grid = 1 * ((grid - (digit * digit_grid)) > 0)
+    91        18    6888710.0 382706.1      3.3          other_digit_valid_grid = np.any(
+    92         9   95756873.0    1e+07     45.3              ALL_TEMPLATES * other_digit_grid == 1, axis=(1, 2)
+    93                                                   )
+    94         9     750522.0  83391.3      0.4          eliminate_array = (
+    95         9     145183.0  16131.4      0.1              digit_valid_grid | other_digit_valid_grid
+    96         9      34174.0   3797.1      0.0          ) * valid_templates_array[digit - 1, :]
+    97         9     268275.0  29808.3      0.1          valid_templates_array[digit - 1, :] -= eliminate_array
+    98         1        584.0    584.0      0.0      return valid_templates_array

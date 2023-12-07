@@ -1,53 +1,49 @@
 Timer unit: 1e-09 s
 
-Total time: 169.636 s
+Total time: 6.51076 s
 File: /home/jhughes2712/projects/c1_assessment/jh2284/prof/scripts/refine_valid_templates_hard.py
-Function: refine_valid_templates at line 73
+Function: refine_valid_templates at line 101
 
 Line #      Hits         Time  Per Hit   % Time  Line Contents
 ==============================================================
-    73                                           def refine_valid_templates(
-    74                                               grid: np.ndarray, valid_templates_list: list[list[int]]
-    75                                           ) -> list[list[int]]:
-    76                                               """!@brief Filters the list of valid templates given the grid of clues.
-    77                                               @details Loops through the subset of valid templates for each digit,
-    78                                               checking if there is a cell on the grid occupied in all templates, but
-    79                                               not recorded on the grid of clues. If such a location is found, this cell
-    80                                               is filled in with the digit, and the valid_templates_list regenerated; it
-    81                                               will be smaller since the grid has fewer empty cells. Continues to loop
-    82                                               until the valid_templates_list no longer changes.
-    83                                               @param grid Sudoku grid stored as a np.ndarray.
-    84                                               @param valid_templates_list List of subsets of valid templates for each
-    85                                               digit; a list of this format can be produced using @ref
-    86                                               find_valid_templates.
-    87                                               @return valid_templates_list List of subsets of valid templates for each
-    88                                               digit.
-    89                                               """
-    90
-    91         1  696238331.0    7e+08      0.4      all_templates = list(generate_templates())
-    92                                               # Loop until the set of valid templates no longer gets smaller
-    93         1        746.0    746.0      0.0      refined = False
-    94         7       2074.0    296.3      0.0      while not refined:
-    95         6       2151.0    358.5      0.0          refined = True
-    96        60      69366.0   1156.1      0.0          for digit_idx in range(9):
-    97        54      55033.0   1019.1      0.0              num_valid_templates_digit = len(valid_templates_list[digit_idx])
-    98       108     502831.0   4655.8      0.0              template_list_digit = [
-    99                                                           all_templates[template_idx]
-   100        54      10697.0    198.1      0.0                  for template_idx in valid_templates_list[digit_idx]
-   101                                                       ]
-   102                                                       # Grid of booleans indicating digits that are fixed across all
-   103                                                       # templates
-   104        54      16005.0    296.4      0.0              fixed_digits = (
-   105       108    2651200.0  24548.1      0.0                  np.sum(template_list_digit, axis=0)
-   106        54      11831.0    219.1      0.0                  == num_valid_templates_digit
-   107                                                       )
-   108                                                       # If there is a fixed digit that is not already on the board, add
-   109                                                       # it to the board and refine the set of valid templates for all
-   110                                                       # digits
-   111        54    1138858.0  21090.0      0.0              if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
-   112        25       8894.0    355.8      0.0                  refined = False
-   113        50     187521.0   3750.4      0.0                  grid += (digit_idx + 1) * (
-   114        25     334667.0  13386.7      0.0                      1 * fixed_digits - 1 * (grid == (digit_idx + 1))
-   115                                                           )
-   116        25        2e+11    7e+09     99.6                  valid_templates_list = find_valid_templates(grid)
-   117         1        167.0    167.0      0.0      return grid, valid_templates_list
+   101                                           def refine_valid_templates(
+   102                                               grid: np.ndarray, valid_templates_array: np.ndarray
+   103                                           ) -> np.ndarray:
+   104                                               """!@brief Filters the array of valid templates given the grid of clues.
+   105                                               @details Loops through the subset of valid templates for each digit,
+   106                                               checking if there is a cell on the grid occupied in all templates, but
+   107                                               not recorded on the grid of clues. If such a location is found, this cell
+   108                                               is filled in with the digit, and the valid_templates_array regenerated; it
+   109                                               will be smaller since the grid has fewer empty cells. Continues to loop
+   110                                               until the valid_templates_array no longer changes.
+   111                                               @param grid Sudoku grid stored as a np.ndarray.
+   112                                               @param valid_templates_array Array of subsets of valid templates for each
+   113                                               digit; an array of this format can be produced using @ref
+   114                                               find_valid_templates.
+   115                                               @return valid_templates_array Array of subsets of valid templates for each
+   116                                               digit.
+   117                                               """
+   118
+   119                                               # Loop until the set of valid templates no longer gets smaller
+   120         1        850.0    850.0      0.0      refined = False
+   121         7       2284.0    326.3      0.0      while not refined:
+   122         6       1282.0    213.7      0.0          refined = True
+   123        60     105123.0   1752.0      0.0          for digit_idx in range(9):
+   124       108     723145.0   6695.8      0.0              template_array_digit = ALL_TEMPLATES[
+   125        54    3027911.0  56072.4      0.0                  np.where(valid_templates_array[digit_idx, :] == 1)[0], :, :
+   126                                                       ]
+   127                                                       # Grid of booleans indicating digits that are fixed across all
+   128                                                       # templates
+   129        54    1268193.0  23485.1      0.0              fixed_digits = np.prod(template_array_digit, axis=0, dtype=int)
+   130                                                       # If there is a fixed digit that is not already on the board, add
+   131                                                       # it to the board and refine the set of valid templates for all
+   132                                                       # digits
+   133        54    1299890.0  24072.0      0.0              if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
+   134        25       6549.0    262.0      0.0                  refined = False
+   135        50      98638.0   1972.8      0.0                  grid += (digit_idx + 1) * (
+   136        25     260727.0  10429.1      0.0                      1 * fixed_digits - 1 * (grid == (digit_idx + 1))
+   137                                                           )
+   138        50 6503958116.0    1e+08     99.9                  valid_templates_array = find_valid_templates(
+   139        25       4849.0    194.0      0.0                      grid, valid_templates_array
+   140                                                           )
+   141         1        185.0    185.0      0.0      return grid, valid_templates_array

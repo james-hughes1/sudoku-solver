@@ -1,96 +1,99 @@
 Timer unit: 1e-09 s
 
-Total time: 14.5732 s
+Total time: 0.426781 s
 File: /home/jhughes2712/projects/c1_assessment/jh2284/prof/scripts/backtrack_easy.py
-Function: solve_backtrack at line 149
+Function: solve_backtrack at line 144
 
 Line #      Hits         Time  Per Hit   % Time  Line Contents
 ==============================================================
-   149                                           def solve_backtrack(grid: np.ndarray) -> np.ndarray:
-   150                                               """!@brief Solves a sudoku using the backtracking method, using templates
-   151                                               to filter the possible values first.
-   152                                               @param grid Sudoku grid of clues stored as a np.ndarray.
-   153                                               @return grid Sudoku grid with all cells containing digits 1-9, so that
-   154                                               all sudoku rules are satisfied.
-   155                                               """
-   156                                               # Check if the start grid clues are valid
-   157         1     880720.0 880720.0      0.0      if not check_grid_valid(grid):
-   158                                                   print(
-   159                                                       "Invalid starting grid, each digit can only appear "
-   160                                                       "once in each row, column and 3x3 box."
-   161                                                   )
-   162                                                   return np.zeros((9, 9))
-   163                                               else:
-   164                                                   # Find set of valid templates and refine the set
-   165         1 7164821270.0    7e+09     49.2          valid_templates_list = find_valid_templates(grid)
-   166         2 6734519281.0    3e+09     46.2          grid, valid_templates_list = refine_valid_templates(
-   167         1        180.0    180.0      0.0              grid, valid_templates_list
-   168                                                   )
-   169         1  670311557.0    7e+08      4.6          all_templates = list(generate_templates())
-   170         1        913.0    913.0      0.0          solved = False
-   171                                                   # Create nested list for candidate digits for each cell, from valid
-   172                                                   # templates
-   173         1      10262.0  10262.0      0.0          possible_digits_array = np.zeros((9, 9, 9))
-   174         2     264547.0 132273.5      0.0          possible_digits_list = [
-   175         1       1758.0   1758.0      0.0              deepcopy([[].copy() for _ in range(9)]) for _ in range(9)
-   176                                                   ]
-   177        10       1877.0    187.7      0.0          for digit_idx in range(9):
-   178        18       3754.0    208.6      0.0              for template_idx in valid_templates_list[digit_idx]:
-   179         9      34492.0   3832.4      0.0                  possible_digits_array[digit_idx] += all_templates[template_idx]
-   180        90      15322.0    170.2      0.0              for row_idx in range(9):
-   181       810     155996.0    192.6      0.0                  for col_idx in range(9):
-   182       729     355296.0    487.4      0.0                      if possible_digits_array[digit_idx][row_idx][col_idx] > 0:
-   183       162      55120.0    340.2      0.0                          possible_digits_list[row_idx][col_idx].append(
-   184        81      12037.0    148.6      0.0                              digit_idx + 1
-   185                                                                   )
-   186         2    1714962.0 857481.0      0.0          possible_digits_gens = [
-   187                                                       [
-   188                                                           (
-   189                                                               possible_digits
-   190                                                               for possible_digits in possible_digits_list[row_idx][
-   191                                                                   col_idx
-   192                                                               ]
-   193                                                               + [0]
-   194                                                           )
-   195                                                           for col_idx in range(9)
-   196                                                       ]
-   197         1        299.0    299.0      0.0              for row_idx in range(9)
-   198                                                   ]
-   199         1      61423.0  61423.0      0.0          search_positions = np.vstack(np.where(grid == 0))
-   200         1        766.0    766.0      0.0          num_search_positions = search_positions.shape[1]
-   201                                                   # Don't search if the refinement of templates solves the sudoku, which
-   202                                                   # happens often
-   203         1        247.0    247.0      0.0          if num_search_positions == 0:
-   204         1        246.0    246.0      0.0              solved = True
-   205         1        153.0    153.0      0.0          search_idx = 0
-   206         1        229.0    229.0      0.0          while not solved:
-   207                                                       current_position = (
-   208                                                           search_positions[0, search_idx],
-   209                                                           search_positions[1, search_idx],
-   210                                                       )
-   211                                                       new_value = next(
-   212                                                           possible_digits_gens[current_position[0]][current_position[1]]
-   213                                                       )
-   214                                                       grid[current_position] = new_value
-   215                                                       # When you reach the maximum candidate digit, backtrack
-   216                                                       if new_value == 0:
-   217                                                           possible_digits_gens[current_position[0]][
-   218                                                               current_position[1]
-   219                                                           ] = (
-   220                                                               possible_digits
-   221                                                               for possible_digits in possible_digits_list[
-   222                                                                   current_position[0]
-   223                                                               ][current_position[1]]
-   224                                                               + [0]
-   225                                                           )
-   226                                                           search_idx -= 1
-   227                                                           assert search_idx >= 0
-   228                                                       else:
-   229                                                           # If current solution is valid, advance the search to the next
-   230                                                           # cell
-   231                                                           if check_grid_valid(grid):
-   232                                                               if search_idx == num_search_positions - 1:
-   233                                                                   solved = True
-   234                                                               else:
-   235                                                                   search_idx += 1
-   236         1         99.0     99.0      0.0          return grid
+   144                                           def solve_backtrack(grid: np.ndarray) -> np.ndarray:
+   145                                               """!@brief Solves a sudoku using the backtracking method, using templates
+   146                                               to filter the possible values first.
+   147                                               @param grid Sudoku grid of clues stored as a np.ndarray.
+   148                                               @return grid Sudoku grid with all cells containing digits 1-9, so that
+   149                                               all sudoku rules are satisfied.
+   150                                               """
+   151                                               # Check if the start grid clues are valid
+   152         1     463312.0 463312.0      0.1      if not check_grid_valid(grid):
+   153                                                   print(
+   154                                                       "Invalid starting grid, each digit can only appear "
+   155                                                       "once in each row, column and 3x3 box."
+   156                                                   )
+   157                                                   return np.zeros((9, 9))
+   158                                               else:
+   159                                                   # Find set of valid templates and refine the set
+   160         1  215512902.0    2e+08     50.5          valid_templates_array = find_valid_templates(grid)
+   161         2  208713471.0    1e+08     48.9          grid, valid_templates_array = refine_valid_templates(
+   162         1        210.0    210.0      0.0              grid, valid_templates_array
+   163                                                   )
+   164         1        364.0    364.0      0.0          solved = False
+   165                                                   # Create nested list for candidate digits for each cell, from valid
+   166                                                   # templates
+   167         1       3972.0   3972.0      0.0          possible_digits_array = np.zeros((9, 9, 9))
+   168         2     270005.0 135002.5      0.1          possible_digits_list = [
+   169         1        983.0    983.0      0.0              deepcopy([[].copy() for _ in range(9)]) for _ in range(9)
+   170                                                   ]
+   171        10       1773.0    177.3      0.0          for digit_idx in range(9):
+   172        18      29548.0   1641.6      0.0              template_array_digit = ALL_TEMPLATES[
+   173         9     277788.0  30865.3      0.1                  np.where(valid_templates_array[digit_idx, :] == 1)[0], :, :
+   174                                                       ]
+   175        18      84040.0   4668.9      0.0              possible_digits_array[digit_idx] += np.sum(
+   176         9       1339.0    148.8      0.0                  template_array_digit, axis=0
+   177                                                       )
+   178        90      17915.0    199.1      0.0              for row_idx in range(9):
+   179       810     137959.0    170.3      0.0                  for col_idx in range(9):
+   180       729     364085.0    499.4      0.1                      if possible_digits_array[digit_idx][row_idx][col_idx] > 0:
+   181       162      64360.0    397.3      0.0                          possible_digits_list[row_idx][col_idx].append(
+   182        81      12664.0    156.3      0.0                              digit_idx + 1
+   183                                                                   )
+   184         2     782676.0 391338.0      0.2          possible_digits_gens = [
+   185                                                       [
+   186                                                           (
+   187                                                               possible_digits
+   188                                                               for possible_digits in possible_digits_list[row_idx][
+   189                                                                   col_idx
+   190                                                               ]
+   191                                                               + [0]
+   192                                                           )
+   193                                                           for col_idx in range(9)
+   194                                                       ]
+   195         1        381.0    381.0      0.0              for row_idx in range(9)
+   196                                                   ]
+   197         1      39950.0  39950.0      0.0          search_positions = np.vstack(np.where(grid == 0))
+   198         1        680.0    680.0      0.0          num_search_positions = search_positions.shape[1]
+   199                                                   # Don't search if the refinement of templates solves the sudoku, which
+   200                                                   # happens often
+   201         1        221.0    221.0      0.0          if num_search_positions == 0:
+   202         1        226.0    226.0      0.0              solved = True
+   203         1        174.0    174.0      0.0          search_idx = 0
+   204         1        218.0    218.0      0.0          while not solved:
+   205                                                       current_position = (
+   206                                                           search_positions[0, search_idx],
+   207                                                           search_positions[1, search_idx],
+   208                                                       )
+   209                                                       new_value = next(
+   210                                                           possible_digits_gens[current_position[0]][current_position[1]]
+   211                                                       )
+   212                                                       grid[current_position] = new_value
+   213                                                       # When you reach the maximum candidate digit, backtrack
+   214                                                       if new_value == 0:
+   215                                                           possible_digits_gens[current_position[0]][
+   216                                                               current_position[1]
+   217                                                           ] = (
+   218                                                               possible_digits
+   219                                                               for possible_digits in possible_digits_list[
+   220                                                                   current_position[0]
+   221                                                               ][current_position[1]]
+   222                                                               + [0]
+   223                                                           )
+   224                                                           search_idx -= 1
+   225                                                           assert search_idx >= 0
+   226                                                       else:
+   227                                                           # If current solution is valid, advance the search to the next
+   228                                                           # cell
+   229                                                           if check_grid_valid(grid):
+   230                                                               if search_idx == num_search_positions - 1:
+   231                                                                   solved = True
+   232                                                               else:
+   233                                                                   search_idx += 1
+   234         1        201.0    201.0      0.0          return grid
