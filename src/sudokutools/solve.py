@@ -39,24 +39,24 @@ def generate_templates() -> Generator[np.ndarray, None, None]:
     produces all 46656 possible templates.
     @return template_grid Digit template generator.
     """
-    # Generate nested list of permutations of [0,1,2]
+    # Generate nested list of permutations of [0,1,2].
     PERMUTATIONS_012 = [list(perm) for perm in permutations(range(3))]
     for column_by_row in permutations(range(9)):
         box_by_row = [pos // 3 for pos in column_by_row]
-        # Check column_by_row corresponds to a valid template
+        # Check column_by_row corresponds to a valid template.
         if (
             (box_by_row[0:3] in PERMUTATIONS_012)
             and (box_by_row[3:6] in PERMUTATIONS_012)
             and (box_by_row[6:9] in PERMUTATIONS_012)
         ):
-            # Yield corresponding template array
+            # Yield corresponding template array.
             template_grid = np.zeros((9, 9))
             for row_idx in range(9):
                 template_grid[row_idx, column_by_row[row_idx]] = 1
             yield template_grid
 
 
-# Create helpful global functions to reduce processing times within routines
+# Create helpful global functions to reduce processing times within routines.
 BOX_GRIDS = np.zeros((9, 9, 9))
 for grid_idx in range(9):
     BOX_GRIDS[
@@ -120,7 +120,7 @@ def refine_valid_templates(
     digit.
     """
 
-    # Loop until the set of valid templates no longer gets smaller
+    # Loop until the set of valid templates no longer gets smaller.
     refined = False
     while not refined:
         refined = True
@@ -129,11 +129,11 @@ def refine_valid_templates(
                 np.where(valid_templates_array[digit_idx, :] == 1)[0], :, :
             ]
             # Grid of booleans indicating digits that are fixed across all
-            # templates
+            # templates.
             fixed_digits = np.prod(template_array_digit, axis=0, dtype=int)
             # If there is a fixed digit that is not already on the board, add
             # it to the board and refine the set of valid templates for all
-            # digits
+            # digits.
             if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
                 refined = False
                 grid += (digit_idx + 1) * (
@@ -152,7 +152,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
     @return grid Sudoku grid with all cells containing digits 1-9, so that
     all sudoku rules are satisfied.
     """
-    # Check if the start grid clues are valid
+    # Check if the start grid clues are valid.
     if not check_grid_valid(grid):
         print(
             "Invalid starting grid, each digit can only appear "
@@ -160,7 +160,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
         )
         return np.zeros((9, 9))
     else:
-        # Find set of valid templates and refine the set
+        # Find set of valid templates and refine the set.
         valid_templates_array = find_valid_templates(grid)
         grid, valid_templates_array = refine_valid_templates(
             grid, valid_templates_array
@@ -182,25 +182,25 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
             )
         for row_idx in range(9):
             for col_idx in range(9):
-                # Add 1 to make the indices from np.where into digits
+                # Add 1 to make the indices from np.where into digits.
                 possible_digits = (
                     np.where(possible_digits_array[:, row_idx, col_idx] > 0)[0]
                     + 1
                 ).tolist()
                 possible_digits_list[row_idx][col_idx] = possible_digits
                 # Add 0 to the generator; this last iterate indicates all
-                # possible values have been tried
+                # possible values have been tried.
                 possible_digits_gens[row_idx][col_idx] = (
                     digit for digit in possible_digits + [0]
                 )
         search_positions = np.vstack(np.where(grid == 0))
         num_search_positions = search_positions.shape[1]
         # Don't search if the refinement of templates solves the sudoku, which
-        # happens often
+        # happens often.
         solved = num_search_positions == 0
         search_idx = 0
         while not solved:
-            # Increment the current cell's value by 1
+            # Increment the current cell's value by 1.
             current_position = (
                 search_positions[0, search_idx],
                 search_positions[1, search_idx],
@@ -209,7 +209,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
                 possible_digits_gens[current_position[0]][current_position[1]]
             )
             grid[current_position] = new_value
-            # When you reach the maximum candidate digit, backtrack
+            # When you reach the maximum candidate digit, backtrack.
             if new_value == 0:
                 possible_digits_gens[current_position[0]][
                     current_position[1]
@@ -224,7 +224,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
                 assert search_idx >= 0
             else:
                 # If current solution is valid, advance the search to the next
-                # cell
+                # cell.
                 if check_grid_valid(grid):
                     if search_idx == num_search_positions - 1:
                         solved = True

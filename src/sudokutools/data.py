@@ -30,12 +30,15 @@ def read_grid(filepath: str) -> np.ndarray:
         except FileNotFoundError:
             print("Invalid filepath: text file does not exist.")
             return np.zeros((9, 9))
+        # If filepath exists and points to .txt file, create a nested list of
+        # the digits in each line.
         else:
             file_digits = []
             for line in file_lines:
                 line_digits = [int(char) for char in line if char.isdigit()]
                 if line_digits:
                     file_digits.append(line_digits)
+            # Check that there are 9 rows of 9 digits.
             if len(file_digits) != 9:
                 print(
                     "Invalid text file: must have exactly 9 lines that "
@@ -62,6 +65,8 @@ def write_grid(grid: np.ndarray, filepath: str = None):
     .txt file location.
     @param grid Sudoku grid stored as a np.ndarray.
     """
+    # Check grid is a numpy array shape (9, 9), with only single digit integer
+    # entries.
     if not isinstance(grid, np.ndarray):
         print("Invalid grid: must be a numpy.array.")
     elif grid.shape != (9, 9):
@@ -69,6 +74,7 @@ def write_grid(grid: np.ndarray, filepath: str = None):
     elif not (np.isin(grid, np.arange(10))).all():
         print("Invalid grid: entries must be integers [0-9].")
     else:
+        # Create the string representing the grid, and output.
         grid_str = ""
         for row_idx in range(9):
             row_str = ""
