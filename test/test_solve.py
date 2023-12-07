@@ -1,9 +1,10 @@
 import numpy as np
 
 from src.sudokutools.solve import (
+    check_grid_valid,
     generate_templates,
     find_valid_templates,
-    check_grid_valid,
+    refine_valid_templates,
     solve_backtrack,
 )
 
@@ -11,6 +12,21 @@ from src.sudokutools.solve import (
 start_grid_easy = np.array(
     [
         [1, 2, 3, 4, 5, 6, 7, 8, 0],
+        [4, 5, 6, 7, 0, 9, 1, 2, 3],
+        [0, 8, 9, 1, 2, 3, 4, 5, 6],
+        [2, 3, 4, 5, 0, 7, 8, 9, 1],
+        [0, 6, 7, 8, 9, 1, 2, 3, 4],
+        [8, 9, 1, 2, 3, 0, 5, 6, 7],
+        [0, 4, 5, 6, 7, 8, 9, 1, 2],
+        [6, 7, 8, 9, 1, 0, 3, 4, 5],
+        [9, 0, 2, 3, 4, 5, 6, 7, 8],
+    ]
+)
+
+# This grid has the same solution as above
+start_grid_refine_test = np.array(
+    [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [4, 5, 6, 7, 0, 9, 1, 2, 3],
         [0, 8, 9, 1, 2, 3, 4, 5, 6],
         [2, 3, 4, 5, 0, 7, 8, 9, 1],
@@ -40,6 +56,14 @@ solution_grid_expected = np.array(
 )
 
 
+def test_check_valid_true():
+    assert check_grid_valid(start_grid_easy)
+
+
+def test_check_valid_false():
+    assert not check_grid_valid(start_grid_invalid)
+
+
 def test_templates():
     # This test uses the fact that there are 46656 templates, and any given
     # cell on the grid is filled in 1 out of 9 of these templates, i.e.
@@ -51,8 +75,19 @@ def test_templates():
     assert (count_array == count_array_expected).all()
 
 
-def test_valid_templates():
+def test_find_valid_templates():
     valid_templates_array = find_valid_templates(start_grid_easy)
+    assert (np.sum(valid_templates_array, axis=1) == np.ones(9)).all()
+
+
+def test_refine_valid_templates():
+    # This test takes a starting grid which is almost trivial, such that
+    # the grid should be completely `solved by refine_valid_templates`.
+    valid_templates_array = find_valid_templates(start_grid_refine_test)
+    solution_grid, refined_valid_templates_array = refine_valid_templates(
+        start_grid_refine_test, valid_templates_array
+    )
+    assert (solution_grid == solution_grid_expected).all()
     assert (np.sum(valid_templates_array, axis=1) == np.ones(9)).all()
 
 
