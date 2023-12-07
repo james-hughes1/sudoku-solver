@@ -1,6 +1,7 @@
 # Cache and Testing
 __pycache__/
-.pytest_cache
+*.py[cod]
+.pytest
 
 # Folders
 docs/
