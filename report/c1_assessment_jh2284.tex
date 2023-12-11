@@ -4,6 +4,18 @@
 \author{James Hughes}
 
 \usepackage{amsmath}
+\usepackage{listings}
+
+\lstdefinestyle{style1}{
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    numbers=left,
+    numbersep=5pt,
+}
+
+\lstset{style=style1}
 
 \bibliographystyle{unsrt}
 
@@ -16,7 +28,7 @@
 \section*{Introduction}
 Explain some basics of Sudoku (citation!), and why this problem relates to/necessitates software development.
 Some salient points such as uniqueness of solution, 17 clues minimum \cite{wiki2} and so on.
-Basic definitions as in the documentation.
+Basic definitions as in the documentation. Also "row condition" and so on.
 
 \section*{Algorithm Selection and Prototyping}
 I decided to base my solution on the "templates" method combined with "backtracking" as described on the Wikipedia page about Sudoku solving algorithms \cite{wiki1}.
@@ -42,11 +54,37 @@ Finally, I also noted that significant error catching was required somewhere bet
 
 INSERT DIAGRAM
 \section*{Development, Experimentation and Profiling}
-Mention of testing-led Development
+I implemented a testing-led development strategy.
+This meant that some of the earliest steps that I took in developing any code was orchestrating unit tests to ensure that the next anticipated phase of development was working properly.
+The main advantage of this was that it heavily directed my development path, keeping me on the right track.
+For instance, in one of my earliest commits (3132ebb) I created the following unit test:
 
-Git: Branches main, dev, test. Commit messages. Gitignore as
+\begin{lstlisting}
+    def test_templates():
+    count_array = np.zeros((9, 9))
+    for template_array in generate_templates():
+        count_array += template_array
+    count_array_expected = 5184 * np.ones((9, 9))
+    assert count_array == count_array_expected
+\end{lstlisting}
+Besides its purpose for validating my future code, this also ensured that in the next phase of development, I specifically had a function called \texttt{generate\_templates}, and that its output was of the form of a 9x9 NumPy array with binary entries.
+This approach during development in general, I already had an idea of what functions I intended to create, and what their inputs and corresponding outputs should look like.
 
-Started with templates
+I also made full use of Git to version control my code.
+I used three branches: \texttt{main}, \texttt{dev}, and \texttt{test}.
+Broadly speaking, I developed the code primarily in the \texttt{dev} branch, and then merged to main once I had code that passed the current testing suite.
+The \texttt{test} branch was for experimental features, but I only used this at one point which I mention later; this was when I had an idea that conflicted with my original plan.
+I also had a strictly self-enforced commit message style for almost all commits, broadly following the "Convential Commits" guidance \cite{ccommits}.
+In particular, while my commit messages weren't as detailed as suggested there, I aimed for a regular structure of a full sentence starting with an imperative term ("Create", "Change", "Remove", "Profile", etc.), and with one of the given "type" words suggested by \cite{ccommits}, such as "Fix", "Test", "Docs", "Build", and "CI".
+
+According to my plan the first development of functional code handled implementing the templates part of the solving method.
+This comprised two functions, \texttt{generate\_templates} and later \texttt{find\_valid\_templates}.
+The former implemented a generator which iterated through all possible templates. I found that an efficient way of doing this was to:
+\begin{itemize}
+    \item enumerate each arrangement of a fixed digit (which I labelled 1) on the grid by a list of length 9, with the $i^{th}$ digit of the array giving the column to which the 1 in the $i^{th}$ row belonged - such an arrangement inherently satisfies the row condition;
+    \item ensure the column condition is satisfied by only iterating through permutations of (1,...,9);
+    \item ensure the box condition is satisfied by finding the remainder of each entry of the array when divided by 3, corresponding to the three boxes on that row, and checking the first, second and third group of 3 entries of the array are individually permutations of (0, 1, 2).
+\end{itemize}
 
 Refactoring
 
