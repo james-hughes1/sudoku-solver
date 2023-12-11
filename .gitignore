@@ -7,3 +7,7 @@ __pycache__/
 docs/
 !*Doxyfile
 prof/scripts/
+report/
+!*.pdf
+!*.tex
+!*.bib
