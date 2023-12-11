@@ -7,7 +7,10 @@ __pycache__/
 docs/
 !*Doxyfile
 prof/scripts/
-report/
-!*.pdf
-!*.tex
-!*.bib
+
+# LaTeX Report
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.log
+report/*.synctex.gz
