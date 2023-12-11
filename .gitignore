@@ -11,3 +11,12 @@ report/
 !*.pdf
 !*.tex
 !*.bib
+
+# Temporary Exceptions
+!*.blg
+!*.bbl
+!__init__.cpython-311.pyc
+!__init__.cpython-39.pyc
+!test_board.cpython-311-pytest-7.4.0.pyc
+!test_solve.cpython-39-pytest-7.4.0.pyc
+!solve.cpython-39.pyc
