@@ -5,6 +5,8 @@
 
 \usepackage{amsmath}
 \usepackage{listings}
+\usepackage{url}
+\usepackage{hyperref}
 
 \lstdefinestyle{style1}{
     basicstyle=\ttfamily\footnotesize,
@@ -14,7 +16,6 @@
     numbers=left,
     numbersep=5pt,
 }
-
 \lstset{style=style1}
 
 \bibliographystyle{unsrt}
@@ -145,21 +146,60 @@ This was compatible with the representation of the grid as a 2D NumPy array itse
 
 \section*{Validation, Unit Tests and Continuous Integration}
 
-Validation ?
+The main form of continuous integration used in this project was via the\texttt{pre-commit} package \cite{precommit}.
+This package enables the developer to specify a file \texttt{.pre-commit-config.yaml} in the root of the repository directory, which determines which 'hooks' to be run every time a commit is attempted.
+In this project, the latest (at the time of development) versions of \texttt{Black} \cite{black} and \texttt{Flake8} \cite{flake8} were used in the file, as well as some pre-defined hooks from the \texttt{pre-commit} repository itself.
+The hooks imported from \texttt{pre-commit} apply simple checks to all file types, for instance checking that all files have a consistent newline character, including one at the end of the file.
+\texttt{Black} is a code formatter, which applies changes to files directly, usually rearranging code so that lines are not too long.
+On the other hand, \texttt{Flake8} is a linter which means it only detects changes, but this typically allows it to be more stringent - for this reason it was made to be the final pre-commit hook, so that it could double check the changes made by \texttt{Black}.
+The \texttt{Black} and \texttt{Flake8} hooks only applied to Python scripts in the repository, aiming to ensure their compliance to PEP 8 \cite{pep8}, a widely-used style guide for Python.
+During the course of the project, it was realised that the two Python hooks were in conflict with eachother in certain instances.
+For example, in trying to commit an updated solve.py script, \texttt{Black} was formatting a block of code to look like:
+\begin{lstlisting}
+    BOX_GRIDS[
+        grid_idx,
+        3 * (grid_idx // 3) : 3 * (grid_idx // 3) + 3,
+        3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
+    ] = 1
+\end{lstlisting}
+However, \texttt{Flake8} was then blocking the commit on the grounds of PEP 8 rules \cite{wspace}. However, this appears to be a misapplication of the PEP 8 guide, which allows spaces around colons when used for slicing.
+Subsequently the \texttt{Flake8} hook was modified to include \texttt{args: [--extend-ignore=E203]} to avoid this conflict; \texttt{Black}'s hook was changed to enforce line-lengths of 79 characters for similar reasons (complying with PEP 8 and avoiding conflicts).
+Notably, no hook was included to run the test-suite upon each commit.
+This would have slowed down development due to the long time taken for the test suite to run, particularly in the early stages of development.
+In an ideal project, continuous integration would include automatic running of the test suite upon any merge to the main branch on the remote GitLab repository, and block such a merge if any test failed.
 
-Testing: reason for multiple files
+In light of the long time required to run the tests, the test suite was divided into three python scripts under the \texttt{test} directory: one for the data handling module, and two for the grid solving functions, with a separate script for the tests that used the minimal starting clue grids (since these took the longest).
+The \texttt{pytest} module was used to run the tests.
+There are eleven tests for the \texttt{data} module functions.
+To validate the \texttt{read\_grid()} function, one test checks that the correct NumPy array is used when the expected input file format is used.
+The rest of the tests handle other cases, such as an input file not in the expected format but can be used to determine a grid, as well as tests that check a helpful error message is outputted when invalid filepaths are given to read.
+Similarly, two of the tests for the \texttt{write\_grid()} function are used to check that it correctly handles writing to a file, and outputting to the terminal, while the other three check that invalid inputs such as non-array types, or arrays that are of the wrong shape or data-type, are handled correctly.
+In the case of the \texttt{solve} module, the tests are used to check that the routines correctly handle their given inputs.
+For instance, the \texttt{check\_grid\_valid()} function is tested twice, checking that it correctly outputs \texttt{True} for a valid grid, and \texttt{False} for an invalid grid.
+Most of the other functions have a similar level of testing; little validation in terms of error catching is necessary since these are backend functions whose inputs are from other functions, rather than from users who could misspecify the input.
+The main exception to this is the \texttt{solve\_backtrack()} function whose input \texttt{grid} should be verified to ensure that the grid indeed has a solution, to prevent an infinite loop in the runtime.
+The testing suite validates this function with six unit tests overall, with one covering the case of a grid with no solution, and the rest covering starting grids with a range of difficulties, including a starting grid that only has nine empty cells, to another that has just one filled cell, to a starting grid antagonistically designed against the backtrack algorithm (see fig)
 
-pre-commit: testing excluded, changes to the args
+Insert fig \url{https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#/media/File:Sudoku_puzzle_hard_for_brute_force.svg}
 
 \section*{Packaging and Usability}
 
-Structure of packages, modularity, refactored code routines
+Structure of packages, modularity, refactored code routines, naming
 
-Usability: docker, documentation, error catching?
+In the project Docker was used to make the code more portable.
+A Dockerfile in the repository root directory specifies exactly how to build the Docker image, which starts with a basic image from Docker Hub that has conda already installed \cite{docker}.
+It then copies the repository into the image and updates the conda environment using \texttt{environment.yml}.
+This is a file which specifies the exact dependencies present in the conda environment used to run the code, allowing for reproducible results, regardless of the user's own conda set-up.
+This file was exported from conda using the \texttt{--no-builds} option meaning that it can be used to reproduce the environment on any operating system, so that the repository is portable even if Docker is not used.
+
+The code was also documented using Doxygen \cite{doxygen}.
+
+Error catching
 
 \section*{Summary}
 
 Reasons for software development practices
+Extensions, e.g. multiple solution catching
 
 Lessons learnt?
 
