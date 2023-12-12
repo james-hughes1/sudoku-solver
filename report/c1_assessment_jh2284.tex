@@ -86,11 +86,17 @@ The former implemented a generator which iterated through all possible templates
     \item ensure the box condition is satisfied by finding the remainder of each entry of the array when divided by 3, corresponding to the three boxes on that row, and checking the first, second and third group of 3 entries of the array are individually permutations of (0, 1, 2).
 \end{itemize}
 
-Refactoring
+Developing the first versions of the template routines that passed the tests was followed by refactoring of some of the functionality.
+For instance in one commit, the way that \texttt{find\_valid\_templates} checked whether any of the 8 remaining digits' clues conflicted with a template was massively improved.
+Originally, this was done using a double-nested for loop, checking each cell, and making a list of the other digits on each iteration.
+This was then changed to initialise the list of \texttt{OTHER\_DIGITS} as a global variable in the module, so that it was only constructed once, saving computational time.
+The nested for loops were also substituted for the use of the NumPy method \texttt{isin()} which later became the use of NumPy's \texttt{any()} method.
+This refactoring not only improved the computational speed of the routine, but also achieved the same functionality in fewer lines, improving readability of the code.
 
-Commenting
+The first prototype of the solving routine experimentally used a simple for loop to iterate through the Cartesian product of the subsets of templates for each digit, using the \texttt{product} method from \texttt{itertools}.
+This was tried before the backtracking algorithm since it only required a very short (11 lines), readable routine, and was therefore worth investigating to see if it was viable.
+While this passed the testing suite, even for the most difficult starting grids, it was immediately found to be very slow for any non-trivial starting grid.
 
-First solve algorithm, brute-force of combinations
 
 Extra template filtering
 
