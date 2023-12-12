@@ -67,7 +67,7 @@ For instance, in one of my earliest commits (3132ebb) I created the following un
     count_array_expected = 5184 * np.ones((9, 9))
     assert count_array == count_array_expected
 \end{lstlisting}
-Besides its purpose for validating my future code, this also ensured that in the next phase of development, I specifically had a function called \texttt{generate\_templates}, and that its output was of the form of a 9x9 NumPy array with binary entries.
+Besides its purpose for validating my future code, this also ensured that in the next phase of development, I specifically had a function called \texttt{generate\_templates()}, and that its output was of the form of a 9x9 NumPy array with binary entries.
 This approach during development in general, I already had an idea of what functions I intended to create, and what their inputs and corresponding outputs should look like.
 
 I also made full use of Git to version control my code.
@@ -97,18 +97,51 @@ The first prototype of the solving routine experimentally used a simple for loop
 This was tried before the backtracking algorithm since it only required a very short (11 lines), readable routine, and was therefore worth investigating to see if it was viable.
 While this passed the testing suite, even for the most difficult starting grids, it was immediately found to be very slow for any non-trivial starting grid.
 
+At this point, considering how one would solve some of the hardest Sudoku grids by hand illuminated the fact that a further 'smart' filtering of the subsets of templates was possible.
+In particular, in some cases the initial clues for a given digit allow certain cells to be filled by using the fact that they are a kind of 'fixed point' in the subset of templates, that is, in all valid templates, a certain cell is always occupied by that digit, but this isn't given as an explicit clue.
+The simplest case of this is when, say, the top left box does not contain a clue for the digit 7, but the other boxes occupying the top row and the left column, do.
+In turn, in many cases this allows us to fill in some cells on the grid with certainty, so we can re-use the \texttt{find\_valid\_templates()} routine on the updated grid, repeat this for all digits in a loop.
+This experimental feature was developed in the \texttt{refine\_valid\_templates()} method in the \texttt{test} branch, with a loop halting when the grid is no longer updated after iterating through all digits.
+The advantage of the feature is that it also uses a brute-force style approach, but in each instance the search space is very small (assuming the initial clues included at least one of each digit 1-9, the set of templates for a given digit to search through is no more than 5184).
+In some of the starting grids with more clues, this routine was found to be sufficient to solve the grid entirely.
 
-Extra template filtering
+After this, it was clear that the backtracking part of the solving algorithm was necessary to solve---in a reasonable time-frame---the grids that were still fairly empty after the new template step.
+In the first prototype of this routine, a nested list of generators was instantiated at the start of the routine, with each generator representing the possible digits that could occupy the corresponding cell.
+A NumPy array \texttt{search\_positions} was used to store the coordinates of the cells that were empty, and thus formed part of the backtracking procedure.
+The variable \texttt{search\_idx} was initialised at zero, and used to keep track of the current location of the backtracking procedure on the grid.
+At each stage, this variable was incremented by 1 to move to next cell in the search, when a valid entry was found for the current cell, and decreased by 1 to move to the previous cell, when all options for the current cell were exhausted.
+Once this variable reached the maximum (the number of coordinate pairs in \texttt{search\_positions}) and the entries of the search cells constituted a valid grid, the backtracking was halted.
 
-Proper backtracking
+Next, the data handling part of the code package was developed.
+This module has two functions, \texttt{read\_grid} and \texttt{write\_grid}.
+Their development began with simple functionality that effectively handled the valid input cases where the arguments they received were in the expected format.
+For instance, the first prototype of \texttt{read\_grid} simply read the specified file line-by-line, building a nested list of characters in each line that was a digit character, and returning this as a NumPy array.
+This worked for text files formatted in the prescribed way, but lacked robustness, raising errors in the face of the most minor violations to this format.
 
-Read and write
+I then implemented extensive error catching starting with the data handling routines in \texttt{data.py}.
+This was appropriate since this module contains front-end functions where the input is more likely to created by a user who could make a mistake such as:
+\begin{itemize}
+    \item Formatting the grid incorrectly
+    \item Specifying the wrong filepath, or similarly not using a .txt file.
+    \item Specifying a non-existing file.
+\end{itemize}
+The error catching was developed to handle such transgressions.
+The approach taken was to take a lenient approach in the case of a badly formatted grid; so long as the text file contained exactly 9 lines that contained any number of digit characters, and each of these contained exactly 9 digit characters, the input file was accepted.
+This meant that input files unambiguously specifying a Sudoku grid were accepted, despite any bad formatting with the characters "|", "+" and "-", and also reduced the complexity of the code as these decorative characters were not checked.
+In the case of any of the other violations above, an informative string was printed explaining the error, and an empty Sudoku grid was returned.
 
-Error catching
+At this point the \texttt{sudokutools} had been fully constructed with all necessary functionality, and steps such as testing and documentation had been implemented.
+The next step was to profile the code using \texttt{line\_profiler}, whose outputs were exported as .txt files in a separate \texttt{prof} directory.
+This was done in the \texttt{dev} branch of the repository.
+The profiling was focused on the solving functions, which were the main bottleneck in the end-to-end solution of a grid specified by an input .txt file, to be outputted to the terminal or a .txt file.
+In particular, the function \texttt{solve\_backtrack} was profiled with input grids of a variety of difficulties, since this function also called all of the other backend solving functions.
+Regardless of the starting grid, it was found that the largest percentage (between 75.5\% and 99.5\%) of time was spent on the lines calling the \texttt{find\_valid\_templates()} and \texttt{refine\_valid\_templates()} functions.
+Further profiling of the latter revealed that most of its own computational time was spent calling the former function, which was therefore the main bottleneck in producing a solution in a short amount of time.
 
-Profiling using line profiler in dev
-
-Optimisation in test branch
+In order to optimise the \texttt{find\_valid\_templates()} function, the main change was to represent the full space of templates as a 3D NumPy array of shape \texttt{(46656, 9, 9)} rather than as a list of arrays.
+Moreover, where before the subsets of valid templates for each digit were stored in a nested list, this was also changed to be a NumPy array of shape \texttt{(9, 46656)}, with each row representing the indices of valid templates for that digit.
+This enabled the use of NumPy's \texttt{any()} method; rather than looping through the list of all templates, to find the list of valid templates.
+This was compatible with the representation of the grid as a 2D NumPy array itself; the check involved creating two new \texttt{(9, 9)} shaped arrays, representing the locations of the digit of interest, and the 'other digits' in the grid, and then checking that both were compatible with the any given template array by using the \text{any()} method across the 2nd and 3rd axes of the \texttt{ALL\_TEMPLATES} array.
 
 \section*{Validation, Unit Tests and Continuous Integration}
 
