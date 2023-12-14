@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{graphicx}
 
 \lstdefinestyle{style1}{
     basicstyle=\ttfamily\footnotesize,
@@ -27,14 +28,30 @@
 
 
 \section*{Introduction}
-Explain some basics of Sudoku (citation!), and why this problem relates to/necessitates software development.
-Some salient points such as uniqueness of solution, 17 clues minimum \cite{wiki2} and so on.
-Basic definitions as in the documentation. Also "row condition" and so on.
 
+Sudoku is a type of simple puzzle, commonly found in the games pages of major UK newspapers.
+It first appeared in `The Times' in 2004, but it can be traced back to a series of popular U.S. puzzle books decades earlier, where it was given the title `Number Place'\cite{sudoku}.
+For consistency, we propose the following definitions for the game, its rules, and related terms.
+
+\begin{enumerate}
+    \item A Sudoku puzzle consists of a $9\times9$ \textbf{grid} where the aim is to fill each of the 81 \textbf{cells} with a single-digit number from 1--9, according to certain rules.
+    \item Each puzzle is differentiated by the \textbf{clues} given on the grid to begin with, which restricts the possible solutions. The empty cells (which we denote with a $0$ in the code) must be filled in.
+    \item (\textbf{Row condition}) Each row of 9 cells must contain the digits 1--9 exactly once.
+    \item (\textbf{Column condition}) Each column of 9 cells must contain the digits 1--9 exactly once.
+    \item The grid can be tesselated by 9 square subsets of cells in a $3\times3$ arrangement; these are referred to as the \textbf{boxes}.
+    \item (\textbf{Box condition}) Each box must contain the digits 1--9 exactly once.
+    \item A grid is \textbf{valid} if its entries satisfy all of the rules above.
+    \item A grid is \textbf{solved} if it is valid and contains no cells that are empty.
+\end{enumerate}
+
+It should be noted that the arrangement of clues for the starting grid can correspond to zero, one, or multiple solutions.
+In 2012, it was proved exhaustively that it is not possible to specify a Sudoku puzzle which has a unique solution if there are less than 17 clues given on the starting grid\cite{17min}.
+Therefore, Sudoku puzzles that start with this number of clues represent the `hardest', in the sense that they have the smallest ratio of number of valid solutions to number of all possible solutions.
+Such puzzles are used later on to check that the code can handle the toughest cases in a reasonable time.
 \section*{Algorithm Selection and Prototyping}
 I decided to base my solution on the "templates" method combined with "backtracking" as described on the Wikipedia page about Sudoku solving algorithms \cite{wiki1}.
 This is a brute-force method, which relies on the fact that the rules of Sudoku inherently limit the number of possible arrangements of any given digit into nine cells on the grid.
-We can see this using a combinatorial argument filling in the 3x3 boxes from left-to-right then top-to-bottom: in the first box there are 9 choices, then 6 choices (one row already occupied), then 4 choices (two rows), then 6 choices (one column) and so on.
+We can see this using a combinatorial argument filling in the $3\times3$ boxes from left-to-right then top-to-bottom: in the first box there are 9 choices, then 6 choices (one row already occupied), then 4 choices (two rows), then 6 choices (one column) and so on.
 \[
     \text{Number of possible templates} = 9\cdot6\cdot3\cdot6\cdot4\cdot2\cdot4\cdot2\cdot1 = 46656
 \]
@@ -68,7 +85,7 @@ For instance, in one of my earliest commits (3132ebb) I created the following un
     count_array_expected = 5184 * np.ones((9, 9))
     assert count_array == count_array_expected
 \end{lstlisting}
-Besides its purpose for validating my future code, this also ensured that in the next phase of development, I specifically had a function called \texttt{generate\_templates()}, and that its output was of the form of a 9x9 NumPy array with binary entries.
+Besides its purpose for validating my future code, this also ensured that in the next phase of development, I specifically had a function called \texttt{generate\_templates()}, and that its output was of the form of a $9\times9$ NumPy array with binary entries.
 This approach during development in general, I already had an idea of what functions I intended to create, and what their inputs and corresponding outputs should look like.
 
 I also made full use of Git to version control my code.
@@ -103,7 +120,7 @@ In particular, in some cases the initial clues for a given digit allow certain c
 The simplest case of this is when, say, the top left box does not contain a clue for the digit 7, but the other boxes occupying the top row and the left column, do.
 In turn, in many cases this allows us to fill in some cells on the grid with certainty, so we can re-use the \texttt{find\_valid\_templates()} routine on the updated grid, repeat this for all digits in a loop.
 This experimental feature was developed in the \texttt{refine\_valid\_templates()} method in the \texttt{test} branch, with a loop halting when the grid is no longer updated after iterating through all digits.
-The advantage of the feature is that it also uses a brute-force style approach, but in each instance the search space is very small (assuming the initial clues included at least one of each digit 1-9, the set of templates for a given digit to search through is no more than 5184).
+The advantage of the feature is that it also uses a brute-force style approach, but in each instance the search space is very small (assuming the initial clues included at least one of each digit 1--9, the set of templates for a given digit to search through is no more than 5184).
 In some of the starting grids with more clues, this routine was found to be sufficient to solve the grid entirely.
 
 After this, it was clear that the backtracking part of the solving algorithm was necessary to solve---in a reasonable time-frame---the grids that were still fairly empty after the new template step.
@@ -146,7 +163,7 @@ This was compatible with the representation of the grid as a 2D NumPy array itse
 
 \section*{Validation, Unit Tests and Continuous Integration}
 
-The main form of continuous integration used in this project was via the\texttt{pre-commit} package \cite{precommit}.
+The main form of continuous integration used in this project was via the\texttt{pre\-commit} package \cite{precommit}.
 This package enables the developer to specify a file \texttt{.pre-commit-config.yaml} in the root of the repository directory, which determines which 'hooks' to be run every time a commit is attempted.
 In this project, the latest (at the time of development) versions of \texttt{Black} \cite{black} and \texttt{Flake8} \cite{flake8} were used in the file, as well as some pre-defined hooks from the \texttt{pre-commit} repository itself.
 The hooks imported from \texttt{pre-commit} apply simple checks to all file types, for instance checking that all files have a consistent newline character, including one at the end of the file.
@@ -178,9 +195,13 @@ In the case of the \texttt{solve} module, the tests are used to check that the r
 For instance, the \texttt{check\_grid\_valid()} function is tested twice, checking that it correctly outputs \texttt{True} for a valid grid, and \texttt{False} for an invalid grid.
 Most of the other functions have a similar level of testing; little validation in terms of error catching is necessary since these are backend functions whose inputs are from other functions, rather than from users who could misspecify the input.
 The main exception to this is the \texttt{solve\_backtrack()} function whose input \texttt{grid} should be verified to ensure that the grid indeed has a solution, to prevent an infinite loop in the runtime.
-The testing suite validates this function with six unit tests overall, with one covering the case of a grid with no solution, and the rest covering starting grids with a range of difficulties, including a starting grid that only has nine empty cells, to another that has just one filled cell, to a starting grid antagonistically designed against the backtrack algorithm (see fig)
+The testing suite validates this function with six unit tests overall, with one covering the case of a grid with no solution, and the rest covering starting grids with a range of difficulties, including a starting grid that only has nine empty cells, to another that has just one filled cell, to a starting grid antagonistically designed against the backtrack algorithm (see Figure \ref{antagonist_clues})
 
-Insert fig \url{https://en.wikipedia.org/wiki/Sudoku_solving_algorithms#/media/File:Sudoku_puzzle_hard_for_brute_force.svg}
+\begin{figure}[hbt]
+    \includegraphics[scale=0.3]{Sudoku_puzzle_hard_for_brute_force.png}
+    \caption{A Sudoku puzzle designed to take a long time with the backtracking algorithm \cite{antagonist}.}
+    \label{antagonist_clues}
+\end{figure}
 
 \section*{Packaging and Usability}
 
