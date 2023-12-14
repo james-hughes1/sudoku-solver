@@ -1,3 +1,13 @@
+"""!@file test_data.py
+@brief Module containing more unit tests to validate the functionality
+of @ref solve.py.
+@details Contains tests specifically for @ref
+sudokutools.solve.solve_backtrack which test its ability to solve
+difficult start grids. Placed in a separate file since these tests
+can have longer runtimes.
+@author Created by J. Hughes on 14/12/2023.
+"""
+
 import numpy as np
 from src.sudokutools.solve import solve_backtrack
 
@@ -91,15 +101,27 @@ solution_grid_expected_3 = np.array(
 
 
 def test_solve_backtrack_medium():
+    """!@brief Check that @ref sudokutools.solve.solve_backtrack
+    produces the correct solution to a starting grid with 29 clues.
+    """
     solution_grid = solve_backtrack(start_grid_medium)
     assert (solution_grid == solution_grid_expected_1).all()
 
 
 def test_solve_backtrack_minimal():
+    """!@brief Check that @ref sudokutools.solve.solve_backtrack
+    produces the correct solution to a starting grid with 17 clues,
+    the least number for which there can be a unique solution to the
+    puzzle.
+    """
     solution_grid = solve_backtrack(start_grid_minimal)
     assert (solution_grid == solution_grid_expected_2).all()
 
 
 def test_solve_backtrack_antagonist():
+    """!@brief Check that @ref sudokutools.solve.solve_backtrack
+    produces the correct solution to a starting grid designed to take a
+    long time for backtracking algorithms to solve.
+    """
     solution_grid = solve_backtrack(start_grid_antagonist)
     assert (solution_grid == solution_grid_expected_3).all()
