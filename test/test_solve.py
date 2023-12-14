@@ -55,6 +55,34 @@ solution_grid_expected = np.array(
     ]
 )
 
+start_grid_no_solution_1 = np.array(
+    [
+        [1, 2, 3, 4, 5, 6, 7, 8, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 9],
+    ]
+)
+
+start_grid_no_solution_2 = np.array(
+    [
+        [1, 2, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 2, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 2, 0],
+        [0, 1, 2, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 2, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 2, 1, 0],
+        [2, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 2, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+)
+
 
 def test_check_valid_true():
     assert check_grid_valid(start_grid_easy)
@@ -102,6 +130,24 @@ def test_solve_backtrack_invalid(capfd):
     assert (
         captured.out == "Invalid starting grid, each digit can only appear "
         "once in each row, column and 3x3 box.\n"
+    )
+
+
+def test_solve_backtrack_no_solution_1(capfd):
+    solve_backtrack(start_grid_no_solution_1)
+    captured = capfd.readouterr()
+    assert (
+        captured.out == "Unacceptable starting grid, this grid cannot be "
+        "solved.\n"
+    )
+
+
+def test_solve_backtrack_no_solution_2(capfd):
+    solve_backtrack(start_grid_no_solution_2)
+    captured = capfd.readouterr()
+    assert (
+        captured.out == "Unacceptable starting grid, this grid cannot be "
+        "solved.\n"
     )
 
 
