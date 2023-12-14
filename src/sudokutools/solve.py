@@ -21,6 +21,7 @@ def check_grid_valid(grid: np.ndarray) -> bool:
     digit = 1
     while valid and digit < 10:
         digit_grid = grid == digit
+        # Check row, column and box condition.
         if (
             (np.sum(digit_grid, axis=0) > 1).any()
             or (np.sum(digit_grid, axis=1) > 1).any()
@@ -56,7 +57,10 @@ def generate_templates() -> Generator[np.ndarray, None, None]:
             yield template_grid
 
 
-# Create helpful global functions to reduce processing times within routines.
+# Create helpful global variables to reduce processing times within routines.
+
+# BOX_GRIDS is a 3D array; BOX_GRIDS[i,:,:] yields a grid with 1's indicating
+# the cells all belonging to one box.
 BOX_GRIDS = np.zeros((9, 9, 9))
 for grid_idx in range(9):
     BOX_GRIDS[
@@ -65,11 +69,12 @@ for grid_idx in range(9):
         3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
     ] = 1
 
+# OTHER_DIGITS[i] = [1, 2, ..., i-1, i+1, ..., 8, 9]
 OTHER_DIGITS = []
 for digit in range(1, 10):
     OTHER_DIGITS.append(list(range(1, digit)) + list(range(digit + 1, 10)))
 
-
+# ALL_TEMPLATES[i] is 9x9 grid array representing the (i)th template.
 ALL_TEMPLATES = np.array(list(generate_templates()))
 
 
@@ -86,15 +91,24 @@ def find_valid_templates(
     @return valid_templates_array The subsets of valid templates for each
     digit.
     """
+    # If no previous valid templates have been found, simply mark all
+    # templates as valid for all digits.
     if valid_templates_array is None:
         valid_templates_array = np.ones((9, 46656))
     for digit in range(1, 10):
+        # Produce a bool array length 46656, checking which templates are
+        # consistent with (i.e. are a 'superset' of) the clues for that digit.
         digit_grid = 1 * (grid == digit)
         digit_valid_grid = np.any(ALL_TEMPLATES - digit_grid < 0, axis=(1, 2))
+        # Produce a similar array, checking which templates do not conflict
+        # withany of the other digits currently on the grid.
         other_digit_grid = 1 * ((grid - (digit * digit_grid)) > 0)
         other_digit_valid_grid = np.any(
             ALL_TEMPLATES * other_digit_grid == 1, axis=(1, 2)
         )
+        # From the current set of templates marked as valid for this digit,
+        # Remove any that (a) aren't consistent with the digit, or (b) aren't
+        # consistent with the other clues, or both.
         eliminate_array = (
             digit_valid_grid | other_digit_valid_grid
         ) * valid_templates_array[digit - 1, :]
@@ -120,6 +134,7 @@ def refine_valid_templates(
     digit.
     """
 
+    # Only run the function if all digits have at least one valid template.
     if not (np.sum(valid_templates_array, axis=1) == 0).any():
         # Loop until the set of valid templates no longer gets smaller.
         refined = False
@@ -132,8 +147,8 @@ def refine_valid_templates(
                 # Grid of booleans indicating digits that are fixed across all
                 # templates.
                 fixed_digits = np.prod(template_array_digit, axis=0, dtype=int)
-                # If there is a fixed digit that is not already on the board,
-                # add it to the board and refine the set of valid templates
+                # If there is a fixed digit that is not already on the grid,
+                # add it to the grid and refine the set of valid templates
                 # for all digits.
                 if np.sum(fixed_digits) > np.sum(grid == (digit_idx + 1)):
                     refined = False
@@ -161,7 +176,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
             "Invalid starting grid, each digit can only appear "
             "once in each row, column and 3x3 box."
         )
-        return np.zeros((9, 9))
+        return np.zeros((9, 9)) - 1
     else:
         # Find set of valid templates and refine the set.
         valid_templates_array = find_valid_templates(grid)
@@ -170,7 +185,7 @@ def solve_backtrack(grid: np.ndarray) -> np.ndarray:
         )
         if (np.sum(valid_templates_array, axis=1) == 0).any():
             print("Unacceptable starting grid, this grid cannot be " "solved.")
-            return np.zeros((9, 9))
+            return np.zeros((9, 9)) - 1
         else:
             # Create nested list for candidate digits for each cell, from valid
             # templates, as well as nested list of generators for the candidate

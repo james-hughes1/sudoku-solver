@@ -22,14 +22,14 @@ def read_grid(filepath: str) -> np.ndarray:
             "Invalid filepath: should end in .txt extension;"
             " file must be a text file."
         )
-        return np.zeros((9, 9))
+        return np.zeros((9, 9)) - 1
     else:
         try:
             with open(filepath, "r") as file:
                 file_lines = file.readlines()
         except FileNotFoundError:
             print("Invalid filepath: text file does not exist.")
-            return np.zeros((9, 9))
+            return np.zeros((9, 9)) - 1
         # If filepath exists and points to .txt file, create a nested list of
         # the digits in each line.
         else:
@@ -44,13 +44,13 @@ def read_grid(filepath: str) -> np.ndarray:
                     "Invalid text file: must have exactly 9 lines that "
                     "contain digits."
                 )
-                return np.zeros((9, 9))
+                return np.zeros((9, 9)) - 1
             elif [len(digits_list) for digits_list in file_digits] != [9] * 9:
                 print(
                     "Invalid text file: must have exactly 9 digits per "
                     "line."
                 )
-                return np.zeros((9, 9))
+                return np.zeros((9, 9)) - 1
             else:
                 grid = np.array(file_digits)
                 return grid
