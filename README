@@ -10,7 +10,7 @@ The project is intended to be a model example of some of the most fundamental so
 
 The project is designed to be usable via Docker. In order to run the project in this way, it is best to clone the repository to your local device using git, build the docker image using the terminal command
 
-`docker build -t sudokusolver`
+`docker build -t sudokusolver .`
 
 and then running the container by executing the command
 
