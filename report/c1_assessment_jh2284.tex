@@ -101,7 +101,7 @@ The former implemented a generator which iterated through all possible templates
 The function does this by representing such a grid using a list of integers of length 9, where:
 \begin{itemize}
     \item the $i^{th}$ digit of the list is the column to which the 1 in the $i^{th}$ row belongs - so the row condition holds;
-    \item the column condition is satisfied by only iterating through permutations of (1,...,9); and,
+    \item the column condition is satisfied by only iterating through permutations of $(1,\ldots,9)$; and,
     \item the box condition is satisfied by finding the remainder of each entry of the array when divided by 3, corresponding to the three boxes on that row, and checking the first, second and third group of 3 entries of the array are individually permutations of (0, 1, 2).
 \end{itemize}
 
@@ -187,7 +187,7 @@ There are three tests for this, including a grid that already contains invalid c
 
 \begin{figure}[hbt]
     \includegraphics[scale=0.3]{Sudoku_puzzle_hard_for_brute_force.png}
-    \caption{An antagonistically designed Sudoku puzzle. Note the digits in reverse order in the top row\cite{antagonist}.}
+    \caption{An antagonistically designed Sudoku puzzle. In the solution the top row digits read $9, 8, \ldots, 1$\cite{antagonist}.}
     \label{antagonist_clues}
 \end{figure}
 
