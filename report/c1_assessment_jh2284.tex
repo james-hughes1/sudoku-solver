@@ -26,7 +26,8 @@
 \maketitle
 \newpage
 
-\section*{Introduction}
+\tableofcontents
+\section{Introduction}
 
 Sudoku is a type of simple puzzle, commonly found in the games pages of major UK newspapers.
 `The Times' first featured a Sudoku in 2004, but the puzzle can be traced back to a series of popular U.S. puzzle books decades earlier, where it was given the title `Number Place'\cite{sudoku}.
@@ -48,7 +49,13 @@ In 2012, it was proved exhaustively that it is not possible to specify a Sudoku 
 Therefore, Sudoku puzzles that start with this number of clues represent the `hardest', in the sense that they have the smallest ratio of number of valid solutions to number of all possible solutions.
 Such puzzles are used later on to check that the code can handle the toughest cases in a reasonable time.
 
-\section*{Algorithm Selection and Prototyping}
+\section{Planning}
+
+\begin{figure}[hbt]
+    \includegraphics[scale=0.23]{sudokuplan1.png}
+    \caption{Original development plan for sudoku project.}
+    \label{plan1}
+\end{figure}
 
 The solution implemented in this repository uses a mixture of `backtracking' and `using templates' \cite{wiki1}.
 It is a brute-force method, which relies on the fact that the rules of Sudoku inherently limit the number of possible arrangements of any given digit into nine cells on the grid---such an arrangement is called a `template'.
@@ -71,7 +78,7 @@ Therefore the backend solving functionality was developed first.
 It was appropriate for these two different parts of the codebase to be separated into two modules under the \texttt{sudokutools} package.
 The final concern apparent before any development occurred was the need for subtle error catching, particularly in the case of puzzles with no solution, to avoid the program running indefinitely.
 
-\section*{Development, Experimentation and Profiling}
+\section{Development}
 The strategy for development was testing-led.
 This meant that some of the earliest development steps was the creation of unit tests to ensure that the next anticipated phase of development was working properly.
 This was done iteratively; as more functionality was developed, more tests were designed to guide the next phase of development, ensuring a defined development path throughout.
@@ -86,7 +93,7 @@ For instance, the following unit test was created in one of the earliest commits
     assert count_array == count_array_expected
 \end{lstlisting}
 
-Tests like this one provide instant validation for the intended function, here \texttt{genera\_templates}, once it has been developed, and also specify the expected format of the inputs and outputs.
+Tests like this one provide instant validation for the intended function, here \texttt{generate\_templates}, once it has been developed, and also specify the expected format of the inputs and outputs.
 
 The repository was version controlled using Git.
 Three branches were used: \texttt{main}, \texttt{dev}, and \texttt{test}.
@@ -123,6 +130,12 @@ This experimental feature was developed in the \texttt{refine\_valid\_templates}
 This feature uses a brute-force style approach, but in each instance the search space is very small---it is just the subset of valid templates for some digit.
 In some of the starting grids with more clues, this routine was found to be sufficient to solve the grid entirely.
 
+\begin{figure}[hbt]
+    \includegraphics[scale=0.23]{sudokuplan2.png}
+    \caption{Updated plan during development; this was just before the backtracking approach was developed.}
+    \label{plan2}
+\end{figure}
+
 After this, it was clear that the proper backtracking part of the solving algorithm was necessary to solve---in a reasonable time-frame---the grids that were still fairly empty after the new template step.
 In the first prototype of this routine, a nested list (with a $9\times9$ shape) of generators was instantiated in the beginning, with each generator representing the possible digits that could occupy the corresponding cell.
 A NumPy array \texttt{search\_positions} was used to store the coordinates of the cells that were empty, i.e. the cells that were involved in the search.
@@ -157,7 +170,7 @@ Similarly, where before the subsets of valid templates for each digit were store
 This enabled the use of NumPy's \texttt{any} method; rather than looping through the list of all templates, to find the list of valid templates.
 This was compatible with the representation of the grid as a 2D NumPy array itself; the check now involved creating two new \texttt{(9, 9)} shaped arrays, representing the locations of the digit of interest, and the other digits in the grid, and then checking that both were compatible with the any given template array by using the \text{any} method across the 2nd and 3rd axes of the \texttt{ALL\_TEMPLATES} array.
 
-\section*{Validation, Unit Tests and Continuous Integration}
+\section{Validation and Continuous Integration}
 
 The main form of continuous integration used in this project was via the\texttt{pre\-commit} package \cite{precommit}.
 In this project, \texttt{Black} \cite{black} and \texttt{Flake8} \cite{flake8} were used, as well as some pre-defined hooks from the \texttt{pre-commit} repository itself.
@@ -191,7 +204,7 @@ There are three tests for this, including a grid that already contains invalid c
     \label{antagonist_clues}
 \end{figure}
 
-\section*{Packaging and Usability}
+\section{Packaging and Usability}
 
 In the project Docker was used to make the code more portable.
 A Dockerfile in the repository root directory specifies exactly how to build the Docker image, which starts with a basic image with conda already installed \cite{docker}.
@@ -203,15 +216,15 @@ The codebase was also documented using Doxygen \cite{doxygen}.
 A frontpage gives an overview of the features of the repository, and there is documentation for every function and unit test.
 The documentation is formatted as a .html page, with great readability and many hyperlinks between pages to see how some functions are connected.
 In addition, the code itself is commented throughout.
-The general approach was to focus on making code readable to the point of comments being unnecessary, with comments added sparsely at the end to explain complex blocks of code.
+The general approach was to make most of the code readable enough to be understood on its own, with comments added sparsely at the end to explain complex blocks of code.
 
 The documentation was improved by a consistent use of terminology and conventions, both in the plain language descriptions as well as variable, function, and module naming.
 This makes it easy to keep track of the purpose of different parts of the code, especially when they are used in tandem.
 
-\section*{Summary}
+\section{Summary}
 
-In summary, the task of developing Sudoku software is best tackled using sophisticated software development practices.
-Without thorough use of the discussed techniques, all of the codebase could still have been produced, however it would have taken much longer, it would have contained more undetected bugs, and maintaining and sharing the project would have been much harder.
+The task of developing a Sudoku solving algorithm is completed far more efficiently using sophisticated software development practices.
+Without the use of the discussed techniques, all of the codebase could still have been produced, however it would have taken much longer, it would have contained more undetected bugs, and maintaining and sharing the project would have been much harder.
 One example of this would be a bug fixed near the end of development, in commit \texttt{332a2dc}.
 Before this change, the solving algorithm only caught impossible starting grids if their clues violated the rules, but ignored other subtler cases.
 Since the code was well documented, and precise unit tests were implemented, it was easy to see exactly what error catching behaviours had been considered and validated in earlier development.
