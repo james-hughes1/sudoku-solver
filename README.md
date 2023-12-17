@@ -21,6 +21,7 @@ where the options specify that the container is removed after exiting, and ensur
 Alternatively, you can run (in the root directory)
 
 `conda env create -f environment.yml`
+
 `conda activate mphildis_assessment_jh2284`
 
 to build the correct conda environment and run the code in the location you cloned it to.
@@ -29,11 +30,15 @@ Next, to run the actual code you simply execute the command
 
 `python src/solve_sudoku.py input.txt`
 
-This gives the solution to the standard sudoku puzzle specified in input.txt, which can be modified to solve different puzzles.
+This gives the solution to the standard sudoku puzzle specified in input.txt, which can be modified to solve different puzzles. Alternatively, use
+
+`python src/solve_sudoku.py input.txt > output.txt`
+
+to save the solution grid to output.txt.
 
 ## Details
 
-Measures have been taken to optimise the code and it is intended to solve any sudoku puzzle in well under 60 seconds. Moreover, it should account for any errors in the input, for instance it will output an error message if the specified problem has no solution. The current version of the code will not however notify the user of a non-unique solution; it will simply output the first solution it finds.
+Measures have been taken to optimise the code and it is intended to solve most Sudoku puzzles in well under 60 seconds. Moreover, it should account for any errors in the input, for instance it will output an error message if the specified problem has no solution. The current version of the code will not however notify the user of a non-unique solution; it will simply output the first solution it finds.
 
 The code is written in Python using version 3.9.18. The testing is done using pytest, and the testing suite can be run by simply using the command `pytest` in the root directory.
 
