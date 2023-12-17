@@ -8,14 +8,27 @@
 \usepackage{url}
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0, 0.6, 0}
+\definecolor{codegray}{rgb}{0.9, 0.9, 0.9}
 
 \lstdefinestyle{style1}{
+    language=Python,
     basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue},
+    backgroundcolor=\color{codegray},
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
+    commentstyle=\color{codegreen},
+    keepspaces=true,
     numbers=left,
     numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
 }
 \lstset{style=style1}
 
@@ -30,7 +43,7 @@
 \section{Introduction}
 
 Sudoku is a type of simple puzzle, commonly found in the games pages of major UK newspapers.
-`The Times' first featured a Sudoku in 2004, but the puzzle can be traced back to a series of popular U.S. puzzle books decades earlier, where it was given the title `Number Place'\cite{sudoku}.
+`The Times' first featured a Sudoku in 2004, but the puzzle can be traced back to a series of popular U.S. puzzle books decades earlier, where it was given the title `Number Place' \cite{sudoku}.
 For consistency, we propose the following definitions for the game, its rules, and related terms.
 
 \begin{enumerate}
@@ -45,14 +58,13 @@ For consistency, we propose the following definitions for the game, its rules, a
 \end{enumerate}
 
 It should be noted that the arrangement of clues for the starting grid can correspond to zero, one, or multiple solutions.
-In 2012, it was proved exhaustively that it is not possible to specify a Sudoku puzzle which has a unique solution if there are less than 17 clues given on the starting grid\cite{17min}.
-Therefore, Sudoku puzzles that start with this number of clues represent the `hardest', in the sense that they have the smallest ratio of number of valid solutions to number of all possible solutions.
-Such puzzles are used later on to check that the code can handle the toughest cases in a reasonable time.
+In 2012, it was proved exhaustively that it is not possible to specify a Sudoku puzzle which has a unique solution if there are less than 17 clues given on the starting grid \cite{17min}.
+Therefore, such puzzles are used later on to check that the code can handle the toughest cases in a reasonable time.
 
 \section{Planning}
 
 \begin{figure}[hbt]
-    \includegraphics[scale=0.23]{sudokuplan1.png}
+    \includegraphics[scale=0.22]{sudokuplan1.png}
     \caption{Original development plan for sudoku project.}
     \label{plan1}
 \end{figure}
@@ -72,7 +84,7 @@ The use of templates decreases the size of the search space massively, and hence
 
 The main concern in the initial development plan was how to store the collection of all template grids, and the sudoku grids themselves.
 The use of the NumPy package enables these to be stored as \texttt{np.ndarray} types, enabling a large number of mathematical and logical operations to be performed on them at high speeds.
-Moreover, assuming the default NumPy behaviour of storing integer arrays as 64-bit signed integers, the template collection would require $46656\cdot81\cdot8\approx3\cdot10^7$ bytes, or 30MB, of memory which is fine for any modern specification computer.
+Moreover, assuming the default NumPy behaviour of storing integer arrays as 64-bit signed integers\cite{numpy}, the template collection would require $46656\cdot81\cdot8\approx3\cdot10^7$ bytes, or 30MB, of memory which is fine for any modern specification computer.
 The development of the frontend code responsible for transforming these arrays to and from string or text formats would depend on the specific representation of the grids used in the solving algorithms.
 Therefore the backend solving functionality was developed first.
 It was appropriate for these two different parts of the codebase to be separated into two modules under the \texttt{sudokutools} package.
@@ -80,12 +92,12 @@ The final concern apparent before any development occurred was the need for subt
 
 \section{Development}
 The strategy for development was testing-led.
-This meant that some of the earliest development steps was the creation of unit tests to ensure that the next anticipated phase of development was working properly.
+This meant that some of the earliest development steps involved the creation of unit tests to ensure that the next anticipated phase of development was working properly.
 This was done iteratively; as more functionality was developed, more tests were designed to guide the next phase of development, ensuring a defined development path throughout.
 For instance, the following unit test was created in one of the earliest commits (\texttt{3132ebb}):
 
 \begin{lstlisting}
-    def test_templates():
+def test_templates():
     count_array = np.zeros((9, 9))
     for template_array in generate_templates():
         count_array += template_array
@@ -93,30 +105,31 @@ For instance, the following unit test was created in one of the earliest commits
     assert count_array == count_array_expected
 \end{lstlisting}
 
-Tests like this one provide instant validation for the intended function, here \texttt{generate\_templates}, once it has been developed, and also specify the expected format of the inputs and outputs.
+Tests like this one provide instant validation for the intended function, here \texttt{generate\_templates}, once it has been developed, and also specify the expected format of the inputs and outputs, aiding development.
 
 The repository was version controlled using Git.
 Three branches were used: \texttt{main}, \texttt{dev}, and \texttt{test}.
-The code was primarily developed in the \texttt{dev} branch, and then merged to main once the current testing suite was satisfied.
+The code was primarily developed in the \texttt{dev} branch, and then merged to \texttt{main} once the current testing suite had been passed.
 The \texttt{test} branch was intended for experimental features---namely any ideas that deviated strongly from the original plan.
 The commit message style was strictly consistent for almost all commits, following the `Convential Commits' guidance \cite{ccommits}.
 In particular, every commit had a regular structure, starting with one of a pre-defined list of `type' words suggested by \cite{ccommits}, such as `Fix' or `Docs'.
-This is then followed by an imperative verb and then a full sentence, to informatively describe the changes made.
+This was then followed by an imperative verb and then a full sentence, to informatively describe the changes made.
+Regular commit message styling made it easier the understand the version history, and to move through this history to earlier commits.
 
 Development began with the backend functions \texttt{generate\_templates} and then \texttt{find\_valid\_templates}.
-The former implemented a generator which iterated through all possible templates, where 0's represent empty cells and 1's represent the chosen digit.
+The former implemented a generator which iterated through all possible templates, where 0's represent empty cells and 1's represent a fixed digit.
 The function does this by representing such a grid using a list of integers of length 9, where:
 \begin{itemize}
-    \item the $i^{th}$ digit of the list is the column to which the 1 in the $i^{th}$ row belongs - so the row condition holds;
+    \item the $i^{th}$ digit of the list is the column to which the 1 in the $i^{th}$ row belongs---so the row condition holds;
     \item the column condition is satisfied by only iterating through permutations of $(1,\ldots,9)$; and,
-    \item the box condition is satisfied by finding the remainder of each entry of the array when divided by 3, corresponding to the three boxes on that row, and checking the first, second and third group of 3 entries of the array are individually permutations of (0, 1, 2).
+    \item the box condition is satisfied by finding the remainder of each entry of the list when divided by 3, corresponding to the three boxes on that row, and checking the first, second and third group of 3 entries of the array are individually permutations of (0, 1, 2).
 \end{itemize}
 
 Regular refactoring was a crucial part of the development strategy.
 For instance, the original implementation of \texttt{find\_valid\_templates} used a double-nested \texttt{for} loop to check each cell, and created a list of the other digits on each iteration, in order to check whether any of the 8 remaining digits' clues conflicted with a template.
 In commit \texttt{60a4faa4}, this was then changed to initialise the list of \texttt{OTHER\_DIGITS} as a global variable in the module, so that it was only constructed once, saving computational time.
-The nested for loops were also substituted for the use of the NumPy method \texttt{isin} which later became the use of NumPy's \texttt{any} method.
-This refactoring not only improved the computational speed of the routine, but also achieved the same functionality in fewer lines, improving readability of the code.
+The nested for loops were also substituted for the use of the NumPy method \texttt{isin} and later NumPy's \texttt{any} method.
+This refactoring not only improved the computational speed of the routine, but also achieved the same functionality in fewer lines, improving the code's readability.
 
 The next major step was implementing the final solving function.
 The first prototype of this algortihm used a simple \texttt{for} loop to iterate through the Cartesian product of the subsets of templates for each digit.
@@ -131,7 +144,7 @@ This feature uses a brute-force style approach, but in each instance the search 
 In some of the starting grids with more clues, this routine was found to be sufficient to solve the grid entirely.
 
 \begin{figure}[hbt]
-    \includegraphics[scale=0.23]{sudokuplan2.png}
+    \includegraphics[scale=0.22]{sudokuplan2.png}
     \caption{Updated plan during development; this was just before the backtracking approach was developed.}
     \label{plan2}
 \end{figure}
@@ -143,7 +156,7 @@ The variable \texttt{search\_idx} was initialised at zero, and used to keep trac
 The backtracking routine then loops through the following steps:
 \begin{enumerate}
     \item Try the next possible digit in the current cell.
-    \item If the current grid is now valid, increase \texttt{search\_idx} by 1. Otherwise, revert to the first possible digit and decrease by 1.
+    \item If the current grid is now valid, increase \texttt{search\_idx} by 1. Otherwise, empty the cell and decrease by 1.
     \item If \texttt{search\_idx} reaches the index of the last `empty' cell and the grid is solved, stop.
 \end{enumerate}
 
@@ -167,12 +180,12 @@ Further profiling revealed that the former function (which is used repeatedly by
 
 In order to optimise \texttt{find\_valid\_templates}, the full space of templates was represented as a 3D NumPy array of shape \texttt{(46656, 9, 9)} rather than as a list of arrays.
 Similarly, where before the subsets of valid templates for each digit were stored in a nested list, this was also changed to be a NumPy array of shape \texttt{(9, 46656)}, with each row representing the indices of valid templates for that digit.
-This enabled the use of NumPy's \texttt{any} method; rather than looping through the list of all templates, to find the list of valid templates.
-This was compatible with the representation of the grid as a 2D NumPy array itself; the check now involved creating two new \texttt{(9, 9)} shaped arrays, representing the locations of the digit of interest, and the other digits in the grid, and then checking that both were compatible with the any given template array by using the \text{any} method across the 2nd and 3rd axes of the \texttt{ALL\_TEMPLATES} array.
+This enabled the use of NumPy's \texttt{any} method, rather than looping through the list of all templates, to find the list of valid templates.
+This was compatible with the representation of the grid as a 2D NumPy array itself; the check now involved creating two new \texttt{(9, 9)} shaped arrays, representing the locations of the digit of interest, and the other digits in the grid, and then checking that both were compatible with the given template array by using the \texttt{any} method across the 2nd and 3rd axes of the \texttt{ALL\_TEMPLATES} array.
 
 \section{Validation and Continuous Integration}
 
-The main form of continuous integration used in this project was via the\texttt{pre\-commit} package \cite{precommit}.
+The main form of continuous integration used in this project was via the \texttt{pre\-commit} package \cite{precommit}.
 In this project, \texttt{Black} \cite{black} and \texttt{Flake8} \cite{flake8} were used, as well as some pre-defined hooks from the \texttt{pre-commit} repository itself.
 The hooks imported from \texttt{pre-commit} apply simple checks to all file types, for instance checking that all files have a consistent newline character.
 \texttt{Black} is a code formatter, which applies changes to files directly, usually rearranging code so that lines are not too long.
@@ -181,13 +194,13 @@ On the other hand, \texttt{Flake8} is a linter which means it only detects chang
 However, these hooks were in conflict with eachother in certain instances.
 For example, in trying to commit an updated \texttt{solve.py} script, \texttt{Black} was formatting a block of code to look like the following:
 \begin{lstlisting}
-    BOX_GRIDS[
-        grid_idx,
-        3 * (grid_idx // 3) : 3 * (grid_idx // 3) + 3,
-        3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
-    ] = 1
+BOX_GRIDS[
+    grid_idx,
+    3 * (grid_idx // 3) : 3 * (grid_idx // 3) + 3,
+    3 * (grid_idx % 3) : 3 * (grid_idx % 3) + 3,
+] = 1
 \end{lstlisting}
-However, \texttt{Flake8} then blocked the commit, despite PEP 8 allowing spaces around colons when slicing\cite{wspace}.
+However, \texttt{Flake8} then blocked the commit, despite PEP 8 allowing spaces around colons when slicing \cite{pep8}.
 Modifying the \texttt{Flake8} hook to include \texttt{args: [--extend-ignore=E203]} resolved this conflict; \texttt{Black}'s hook was changed to enforce line-lengths of 79 characters for a similar conflict resolution.
 Notably, no hook was included to run the test-suite upon each commit, due to the long time taken for the test suite to run, particularly in the early stages of development.
 An ideal project would include automatic running of the test suite upon any attempted merge to the main branch on the remote GitLab repository, and block such a merge if any test failed.
@@ -200,15 +213,15 @@ There are three tests for this, including a grid that already contains invalid c
 
 \begin{figure}[hbt]
     \includegraphics[scale=0.3]{Sudoku_puzzle_hard_for_brute_force.png}
-    \caption{An antagonistically designed Sudoku puzzle. In the solution the top row digits read $9, 8, \ldots, 1$\cite{antagonist}.}
+    \caption{An antagonistically designed Sudoku puzzle, used to test the solving algorithm. In the solution the top row digits read $9, 8, \ldots, 1$ \cite{antagonist}.}
     \label{antagonist_clues}
 \end{figure}
 
 \section{Packaging and Usability}
 
-In the project Docker was used to make the code more portable.
+Docker was used to make the code more portable.
 A Dockerfile in the repository root directory specifies exactly how to build the Docker image, which starts with a basic image with conda already installed \cite{docker}.
-It then builds the repository, and then updates the conda environment using \texttt{environment.yml}.
+It then builds the repository, and updates the conda environment using \texttt{environment.yml}.
 This file specifies the exact dependencies in the conda environment used to run the code, allowing for reproducible results.
 It was exported from conda using the \texttt{--no-builds} option meaning that it can be used to reproduce the environment on any operating system.
 
@@ -223,7 +236,7 @@ This makes it easy to keep track of the purpose of different parts of the code, 
 
 \section{Summary}
 
-The task of developing a Sudoku solving algorithm is completed far more efficiently using sophisticated software development practices.
+The task of developing a Sudoku solving algorithm is completed far more efficiently by using sophisticated software development practices.
 Without the use of the discussed techniques, all of the codebase could still have been produced, however it would have taken much longer, it would have contained more undetected bugs, and maintaining and sharing the project would have been much harder.
 One example of this would be a bug fixed near the end of development, in commit \texttt{332a2dc}.
 Before this change, the solving algorithm only caught impossible starting grids if their clues violated the rules, but ignored other subtler cases.
@@ -231,7 +244,7 @@ Since the code was well documented, and precise unit tests were implemented, it 
 This enabled the bug to be spotted and fixed much more easily.
 
 In a similar way, there is scope for further improvement. For instance, the algorithm could indicate the uniqueness of the solution, and even count the total number of possible solutions, or indicate if the clues constitue a `minimal' set of clues.
-Due to the portability of the code, as well as the use of Git in sharing the repository, this task could easily be carried out by another developer completely new to the repository.
+Due to the portability of the code, as well as the use of Git in sharing the repository, this task could easily be carried out by another developer completely new to the project.
 
 \bibliography{Biblio}
 
